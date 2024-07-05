@@ -1,10 +1,10 @@
 #!/usr/bin/env php
 <?php
 
-use support\Container;
 use Webman\Config;
 use Webman\Console\Command;
 use Webman\Console\Util;
+use support\Container;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
