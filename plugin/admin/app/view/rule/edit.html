@@ -1,0 +1,185 @@
+<div class="main-container">
+    <form class="layui-form" id="rule-edit-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">标题</label>
+            <div class="layui-input-block">
+                <input type="text" name="title" id="title" required lay-verify="required" autocomplete="off"
+                       placeholder="请输入标题"
+                       class="layui-input" value="">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">标识</label>
+            <div class="layui-input-block">
+                <input type="text" name="key" required lay-verify="required" value="" autocomplete="off"
+                       class="layui-input">
+                <tip>控制器路径：命名空间+控制器名称，例如：plugin\admin\app\controller\AdminController。</tip>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">上级菜单</label>
+            <div class="layui-input-block">
+                <div name="pid" id="pid" value="0"></div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">url</label>
+            <div class="layui-input-block">
+                <input type="text" name="href" value="" class="layui-input">
+                <tip>页面打开地址，例如：/app/admin/role/index</tip>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">图标</label>
+            <div class="layui-input-block">
+                <input name="icon" id="icon"/>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">类型</label>
+            <div class="layui-input-inline">
+                <div name="type" id="type" value="1"></div>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">排序</label>
+            <div class="layui-input-block">
+                <input type="number" name="weight" value="0" class="layui-input">
+                <tip>越小越靠前</tip>
+            </div>
+        </div>
+
+        <div class="bottom">
+            <div class="button-container">
+                <button type="submit" class="layui-btn layui-btn-sm" lay-submit=""
+                        lay-filter="data-save">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div>
+<script>
+  let PRIMARY_KEY = "id";
+  let PRIMARY_KEY_VALUE = "{:request()->get('id')}";
+  layui.use(["form", "iconPicker", "util"], function () {
+    var $ = layui.$;
+    var form = layui.form;
+
+    $.ajax({
+      url: "/app/admin/rule/select?" + PRIMARY_KEY + "=" + PRIMARY_KEY_VALUE,
+      dataType: "json",
+      success: function (res) {
+        // 赋值表单
+        layui.each(res.data[0], function (key, value) {
+          var $targetForm = $('#rule-edit-form');
+          let obj = $targetForm.find('*[name="' + key + '"]');
+          if (key === "password") {
+            obj.attr("placeholder", "不更新密码请留空");
+            return;
+          }
+          if (typeof obj[0] === "undefined" || !obj[0].nodeName) {
+            return;
+          }
+          if (obj[0].nodeName.toLowerCase() === "textarea") {
+            obj.html(layui.util.escape(value));
+          } else {
+            obj.attr("value", value);
+          }
+        });
+
+        // 图标选择
+        layui.iconPicker.render({
+          elem: "#icon",
+          type: "fontClass",
+          page: false,
+        });
+
+        // 获取上级菜单
+        layui.use(["xmSelect"], function () {
+          layui.$.ajax({
+            url: "/app/admin/rule/select?format=tree&type=0,1",
+            dataType: "json",
+            success: function (res) {
+              if (res.code !== 200) {
+                return hui_toast('error', res.msg);
+              }
+              let value = layui.$("#pid").attr("value");
+              let initValue = value ? value.split(",") : [];
+              layui.xmSelect.render({
+                el: "#pid",
+                name: "pid",
+                initValue: initValue,
+                tips: "无",
+                toolbar: {show: true, list: ["CLEAR"]},
+                data: res.data,
+                theme: {color: 'var(--global-primary-color)'},
+                model: {"icon": "hidden", "label": {"type": "text"}},
+                clickClose: true,
+                radio: true,
+                tree: {show: true, "strict": false, "clickCheck": true, "clickExpand": false, expandedKeys: initValue},
+              });
+            }
+          })
+        })
+
+        //下拉：类型
+        layui.use(["xmSelect"], function () {
+          let value = layui.$("#type").attr("value");
+          let initValue = value ? value.split(",") : [];
+          layui.xmSelect.render({
+            el: "#type",
+            name: "type",
+            initValue: initValue,
+            data: [{"value": "0", "name": "目录"}, {"value": "1", "name": "菜单"}, {"value": "2", "name": "权限"}],
+            theme: {color: 'var(--global-primary-color)'},
+            model: {"icon": "hidden", "label": {"type": "text"}},
+            clickClose: true,
+            radio: true,
+          });
+        });
+
+        // ajax产生错误
+        if (res.code === 0) {
+          return hui_toast('error', res.msg);
+        }
+
+      }
+    });
+
+    // 提交事件
+    layui.form.on("submit(data-save)", function (data) {
+      data.field[PRIMARY_KEY] = PRIMARY_KEY_VALUE;
+      layui.$.ajax({
+        url: '/app/admin/rule/edit',
+        type: "POST",
+        dateType: "json",
+        data: data.field,
+        success: function (res) {
+          if (res.code !== 200) {
+            return hui_toast('error', res.msg);
+          }
+          return hui_toast('success', "操作成功", function () {
+            //刷新数据表格
+            if (parent.hasOwnProperty('refreshTable')) {
+              refreshTable('ruleTable', 2);
+              layer.closeAll('page');
+            }
+          });
+        }
+      });
+      return false;
+    });
+
+  });
+</script>

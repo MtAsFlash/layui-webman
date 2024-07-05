@@ -1,0 +1,173 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-row top-search-from">
+            <form class="layui-form layui-col-md12 layui-form-admin">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <input type="text" name="username"
+                               placeholder="{:trans('Please enter', ['%s%' => trans('Username',[],'admin')])}"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-inline">
+                        <input type="text" name="mobile"
+                               placeholder="{:trans('Please enter', ['%s%' => trans('Mobile',[],'admin')])}"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-inline">
+                        <input type="text" name="email"
+                               placeholder="{:trans('Please enter', ['%s%' => trans('Email',[],'admin')])}"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-inline" style="width:130px;">
+                        <select name="status">
+                            <option value="">=={:trans('Status')}==</option>
+                            <option value="1">{:trans('Status success')}</option>
+                            <option value="0">{:trans('Status error')}</option>
+                        </select>
+                    </div>
+
+                    <div class="layui-inline">
+                        <button class="layui-btn layui-btn-md" data-type="reload" lay-submit=""
+                                lay-filter="table-search-admin">
+                            <i class="layui-icon layui-icon-search"></i>{:trans('Search')}
+                        </button>
+                        <button class="layui-btn layui-btn-danger layui-btn-md" type="reset"
+                                lay-submit="" lay-filter="table-reset-admin">
+                            <i class="layui-icon">&#xe63f;</i>{:trans('Clear')}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div style="">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table class="layui-hide" id="adminTable" lay-filter="adminTable"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="adminTableToolbar">
+    <button class="layui-btn layui-btn-sm" permission="app.admin.admin.add"
+            data-open="/app/admin/admin/add" data-title="{:trans('Add...',['%s%'=>trans('Admin',[],'admin')])}">
+        <i class="layui-icon layui-icon-add-1"></i>
+        {:trans('Add')}
+    </button>
+</script>
+
+<!--<script type="text/html" id="adminStatusTpl">
+    {{# if(d.show_toolbar){ }}
+    <input type="checkbox" name="admin-index-status" value="{{d.id}}" lay-skin="switch"
+           lay-text="{:trans('Status success')}|{:trans('Status error')}"
+           lay-filter="switchStatus" data-primary-key="id" data-field="status"
+           data-href="/app/admin/admin/edit" {{d.status== 1 ? 'checked' : '' }} />
+    {{# } }}
+</script>-->
+<script type="text/html" id="adminStatusTpl">
+    {{#  if(d.status =='1'){ }}
+    <span class="layui-badge layui-bg-green"> 已启用 </span>
+    {{#  } else { }}
+    <span class="layui-badge layui-bg-danger"> 已禁用 </span>
+    {{#  } }}
+</script>
+<script type="text/html" id="adminBarTool">
+    {{# if(d.show_toolbar){ }}
+    <button class="layui-btn layui-btn-xs" title="{:trans('Edit')}" permission="app.admin.admin.edit"
+            data-open="/app/admin/admin/edit?id={{d.id}}"
+            data-title="{:trans('Edit')}">{:trans('Edit')}
+    </button>
+    <button class="layui-btn layui-btn-danger layui-btn-xs" title="{:trans('Delete')}"
+            permission="app.admin.admin.delete"
+            data-confirm="/app/admin/admin/delete" data-data="id={{d.id}}"
+            data-title="{:trans('Are you sure', ['%s%' => trans('Delete')])}" data-reload="1"
+            data-table-id="adminTable">
+        {:trans('Delete')}
+    </button>
+    {{# } }}
+</script>
+
+<script>
+  layui.use(['table', 'form', 'util'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var table = layui.table;
+    var util = layui.util;
+    form.render();
+
+    var tableInit = table.render({
+      elem: '#adminTable',
+      toolbar: '#adminTableToolbar',
+      defaultToolbar: [{
+        layEvent: 'refresh',
+        icon: 'layui-icon-refresh',
+        title: "{:trans('Refresh')}"
+      }, 'filter', 'exports'],
+      method: 'get',
+      url: "/app/admin/admin/select",
+      parseData: function (res) {
+        return {
+          "code": 0,
+          "msg": res.msg,
+          "count": res.count,
+          "data": res.data
+        };
+      },
+      cellMinWidth: 100,
+      cols: [[
+        {field: 'id', title: 'ID', width: 60, align: 'center'},
+        {field: 'username', title: "{:trans('Username',[],'admin')}"},
+        {field: 'nickname', title: "{:trans('Nickname',[],'admin')}", width: 110},
+        {
+          title: "{:trans('Role',[],'admin')}",
+          field: "roles",
+          templet: function (d) {
+            let field = "roles_arr";
+            if (typeof d[field] == "undefined") return "";
+            let items = [];
+            layui.each(d[field], function (k, v) {
+              items.push(v.name);
+            });
+            return util.escape(items.join(","));
+          }
+        },
+        {field: 'login_time', title: "{:trans('Last login time',[],'admin')}", width: 170},
+        {field: 'login_ip', title: "{:trans('Last login ip',[],'admin')}", width: 170},
+        {field: 'create_time', title: "{:trans('CreateTime')}", width: 170},
+        {field: 'status', title: "{:trans('Status')}", templet: '#adminStatusTpl', align: 'center', width: 100},
+        {fixed: 'right', title: "{:trans('Operation')}", toolbar: '#adminBarTool', align: 'center', width: 130}
+      ]],
+      page: true,
+      limit: 10
+    });
+
+    // 表头工具栏工具事件
+    table.on("toolbar(" + tableInit.config.id + ")", function (obj) {
+      if (obj.event === "refresh") {
+        refreshTable(tableInit.config.id, 1);
+      }
+    })
+
+    // 表格顶部搜索事件
+    form.on("submit(table-search-admin)", function (data) {
+      table.reload(tableInit.config.id, {
+        where: data.field
+      })
+      return false;
+    });
+    //表格顶部清空时间
+    form.on("submit(table-reset-admin)", function (data) {
+      $(".layui-form-admin")[0].reset();
+      form.render();
+      table.reload(tableInit.config.id, {
+        where: {}
+      })
+      return false;
+    })
+
+  });
+</script>

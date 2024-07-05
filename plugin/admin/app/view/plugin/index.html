@@ -1,0 +1,212 @@
+<style>
+
+</style>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="data-table" lay-filter="data-table"></table>
+    </div>
+</div>
+
+<script type="text/html" id="install">
+    {{# if(!d.installed){ }}
+    <button class="layui-btn layui-btn-xs layui-btn-primary" onclick="install('{{ d.name }}','{{ d.version }}')">
+        安装
+    </button>
+    {{# }else{ }}
+    {{# if(d.installed < d.version){ }}
+    <button class="layui-btn layui-btn-xs layui-btn-success"
+            onclick="upgrade('{{ d.name }}','{{ d.version }}','{{ d.title }}','{{ d.last_data }}','{{ d.last_desc }}')">
+        升级
+    </button>
+    {{# } }}
+    {{# if(d.name !== "admin"){ }}
+    <button class="layui-btn layui-btn-xs layui-btn-danger" onclick="uninstall('{{ d.name }}','{{ d.installed }}')">
+        卸载
+    </button>
+    {{# } }}
+    {{# } }}
+</script>
+
+<div id="upgrade-overlay" class="upgrade-overlay"></div>
+<div id="upgrade-popup" class="upgrade-popup">
+    <div id="upgrade-closePopupBtn" class="upgrade-closePopupBtn">
+        <i></i>
+    </div>
+    <h3 id="upgrade-plugin-title"></h3>
+    <div class="upgrade-box">
+        <div class="upgrade-box-title">
+            <h2>发现新的版本！</h2>
+        </div>
+        <div class="upgrade-box-date">
+            <p>最新版本: <span id="upgrade-lastvsrsion"></span></p>
+            <p>更新时间：<span id="upgrade-lasttime"></span></p>
+        </div>
+        <div class="clearfix"></div>
+        <div class="upgrade-box-desc">
+
+        </div>
+        <input type="hidden" id="upgrade-name-input">
+        <input type="hidden" id="upgrade-version-input">
+        <div class="upgrade-box-btn">
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-radius upgrade-closePopupBtn">
+                忽略本次更新
+            </button>
+            <button type="button" class="layui-btn layui-btn-radius" id="upgradeTrue">立即更新</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+  const SELECT_API = "/app/admin/plugin/list";
+  const AUTH_URL = "/app/admin/plugin/login";
+  const PAY_URL = "/app/admin/plugin/pay";
+
+  layui.use(["table", "form", "common", "popup"], function () {
+    let table = layui.table;
+    let form = layui.form;
+    let $ = layui.$;
+    let common = layui.common;
+
+    // 表头参数
+    let cols = [
+      {
+        title: "名称",
+        field: "name",
+        templet: function (d) {
+          return '<a target="_blank" href="https://www.workerman.net/app/view/' + d.name + '">' + d.title + '</a>';
+        },
+      }, {
+        title: "作者",
+        field: "author",
+        width: 180,
+        align: "center"
+      }, {
+        title: "价格",
+        field: "price",
+        width: 100,
+        align: "center"
+      }, {
+        title: "当前版本",
+        field: "installed",
+        width: 100,
+        align: "center"
+      }, {
+        title: "操作",
+        field: "installed",
+        templet: "#install",
+        width: 180,
+        align: "center"
+      }
+    ];
+
+    function render() {
+      table.render({
+        elem: "#data-table",
+        url: SELECT_API,
+        page: true,
+        cols: [cols],
+        skin: "line",
+        size: "lg",
+        autoSort: false,
+        defaultToolbar: [{
+          title: "刷新",
+          layEvent: "refresh",
+          icon: "layui-icon-refresh",
+        }, "filter", "print", "exports"]
+      });
+    }
+
+    render();
+
+    window.upgrade = function (name, version, title, date, description) {
+      $('#upgrade-plugin-title').html(title);
+      $('#upgrade-lastvsrsion').html("v" + version);
+      $('#upgrade-lasttime').html(date);
+      $('.upgrade-box-desc').html(description);
+      $('#upgrade-name-input').val(name);
+      $('#upgrade-version-input').val(version);
+      $('#upgrade-overlay').show();
+      $('#upgrade-popup').show();
+    };
+    $('.upgrade-closePopupBtn').click(function () {
+      $('#upgrade-overlay').hide();
+      $('#upgrade-popup').hide();
+    });
+
+    $('#upgradeTrue').click(function () {
+      let name = $('#upgrade-name-input').val();
+      let version = $('#upgrade-version-input').val();
+      install(name, version);
+    })
+
+    window.install = function (name, version) {
+      let loading = layer.load();
+      $.ajax({
+        url: "/app/admin/plugin/install",
+        type: "POST",
+        dataType: "json",
+        data: {name, version},
+        success: function (res) {
+          // 需要登录官网
+          switch (res.code) {
+            case 0:
+              return layui.popup.success(res.msg, function () {
+                parent.location.reload();
+              });
+            case -1:
+              layer.open({
+                type: 2,
+                title: "登录 workerman.net 官网",
+                shade: 0.1,
+                area: [common.isModile() ? "100%" : "500px", common.isModile() ? "100%" : "450px"],
+                content: AUTH_URL
+              });
+              return;
+            case -2:
+              layer.open({
+                type: 2,
+                title: "购买插件",
+                shade: 0.1,
+                area: [common.isModile() ? "100%" : "500px", common.isModile() ? "100%" : "95%"],
+                content: PAY_URL + '?app=' + name
+              });
+              return;
+            default:
+              return layui.popup.failure(res.msg);
+          }
+        },
+        complete: function () {
+          layer.close(loading);
+        }
+      });
+    }
+
+    window.uninstall = function (name, version) {
+      layer.confirm("确定卸载?", {
+        icon: 3,
+        title: "提示"
+      }, function (index) {
+        layer.close(index);
+        let loading = layer.load();
+        $.ajax({
+          url: "/app/admin/plugin/uninstall",
+          type: "POST",
+          dataType: "json",
+          data: {name, version},
+          success: function (res) {
+            if (res.code) {
+              return layui.popup.failure(res.msg);
+            }
+            return layui.popup.success("卸载成功", function () {
+              parent.location.reload();
+            });
+          },
+          complete: function () {
+            layer.close(loading);
+          }
+        });
+      });
+    }
+  })
+</script>

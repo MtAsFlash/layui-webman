@@ -1,0 +1,81 @@
+<div style="">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table class="layui-hide" id="logSystemTable" lay-filter="logSystemTable"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="logSystemInfoTpl">
+    <button class="layui-btn layui-btn-xs layui-bg-purple" lay-event="logSystemContentTplInfo">点击查看</button>
+</script>
+
+<script>
+  layui.use(['table', 'form', 'code'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var table = layui.table;
+    var code = layui.code;
+    form.render();
+    var tableInit = table.render({
+      elem: '#logSystemTable',
+      toolbar: '#logSystemTableToolbar',
+      defaultToolbar: [{
+        layEvent: 'refresh',
+        icon: 'layui-icon-refresh',
+        title: '刷新'
+      }, 'filter', 'exports'],
+      method: 'get',
+      url: "/app/admin/logsystem/select?field=id&order=desc",
+      parseData: function (res) {
+        return {
+          "code": 0,
+          "msg": res.msg,
+          "count": res.count,
+          "data": res.data
+        };
+      },
+      cellMinWidth: 100,
+      cols: [[
+        {field: 'admin_id', title: '管理员ID', width: 60, align: 'center'},
+        {field: 'admin_name', title: '管理员名称', width: 80, align: 'center'},
+        {field: 'title', title: '操作名', minWidth: 160},
+        {field: 'url', title: '操作地址'},
+        {field: 'info', title: '操作内容', width: 100, templet: '#logSystemInfoTpl', align: 'center'},
+        {field: 'ip', title: 'ip地址', width: 150},
+        {field: 'create_time', title: '操作时间', width: 170}
+      ]],
+      page: true,
+      limit: 10
+    });
+
+    // 表头工具栏工具事件
+    table.on("toolbar(" + tableInit.config.id + ")", function (obj) {
+      if (obj.event === "refresh") {
+        refreshTable(tableInit.config.id, 1);
+      }
+    })
+
+    table.on("tool(" + tableInit.config.id + ")", function (obj) {
+      var title = obj.data.title;
+      var value = JSON.stringify(JSON.parse(obj.data.content), null, 4)
+      if (obj.event === "logSystemContentTplInfo") {
+        //查看值
+        layer.open({
+          type: 1,
+          title: "查看详情：" + title,
+          shade: 0.3,
+          shadeClose: true,
+          area: ["500px"],
+          content: '<pre class="layui-code log-system-content-json" lay-options="{}">' + value + '</pre>'
+        });
+        layui.code({
+          elem: '.log-system-content-json',
+          preview: false,
+          ln: false,
+          theme: 'dark'
+        });
+      }
+    })
+
+  });
+</script>

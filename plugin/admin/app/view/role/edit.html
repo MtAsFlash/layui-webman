@@ -1,0 +1,207 @@
+<div class="main-container">
+    <form class="layui-form" id="role-edit-form" action="" method="post">
+        <div class="layui-form-item">
+            <label class="layui-form-label">父级</label>
+            <div class="layui-input-block">
+                <div name="pid" id="pid" value=""></div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">角色名</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" required lay-verify="required" autocomplete="off"
+                       placeholder="请输入角色名称" class="layui-input" value="">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">选择权限</label>
+            <div class="layui-input-block">
+                <div id="role_ids" class="role-tree-more"></div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="checkbox" id="role-status" lay-filter="role-status" lay-skin="switch"/>
+                <input type="text" style="display:none" name="status" value="0"/>
+            </div>
+        </div>
+        <div class="bottom">
+            <div class="button-container">
+                <button type="submit" class="layui-btn layui-btn-sm" lay-submit=""
+                        lay-filter="data-save">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+  let PRIMARY_KEY = "id";
+  let PRIMARY_KEY_VALUE = "{:request()->get('id')}";
+  layui.use(["form", "iconPicker", "util"], function () {
+    let $ = layui.$;
+    let tree = layui.tree;
+    let form = layui.form;
+
+    $.ajax({
+      url: "/app/admin/role/select?" + PRIMARY_KEY + "=" + PRIMARY_KEY_VALUE,
+      dataType: "json",
+      success: function (res) {
+        // 赋值表单
+        layui.each(res.data[0], function (key, value) {
+          var $targetForm = $('#role-edit-form');
+          let obj = $targetForm.find('*[name="' + key + '"]');
+          if (key === "password") {
+            obj.attr("placeholder", "不更新密码请留空");
+            return;
+          }
+          if (typeof obj[0] === "undefined" || !obj[0].nodeName) {
+            return;
+          }
+          if (obj[0].nodeName.toLowerCase() === "textarea") {
+            obj.html(layui.util.escape(value));
+          } else {
+            obj.attr("value", value);
+          }
+        });
+        getRules(res.data[0].pid, res.data[0].rules);
+
+        // 字段 状态 status
+        layui.use(["form"], function () {
+          layui.$("#role-status").attr("checked", layui.$('input[name="status"]').val() != 0);
+          layui.form.render();
+          layui.form.on("switch(role-status)", function (data) {
+            layui.$('input[name="status"]').val(this.checked ? 1 : 0);
+          });
+        })
+
+        //父级角色名称
+        layui.use(["xmSelect"], function () {
+          layui.$.ajax({
+            url: "/app/admin/role/select?format=tree",
+            dataType: "json",
+            success: function (res3) {
+              let value = layui.$("#pid").attr("value");
+              let initValue = value ? value.split(",") : [];
+              layui.xmSelect.render({
+                el: "#pid",
+                name: "pid",
+                initValue: initValue,
+                tips: "请选择",
+                toolbar: {show: true, list: ["CLEAR"]},
+                data: res3.data,
+                value: "0",
+                theme: {color: 'var(--global-primary-color)'},
+                model: {"icon": "hidden", "label": {"type": "text"}},
+                clickClose: true,
+                radio: true,
+                tree: {show: true, "strict": false, "clickCheck": true, "clickExpand": false, expandedKeys: true},
+                on: function (data) {
+                  let id = data.arr[0] ? data.arr[0].value : "";
+                  if (!id) return;
+                  getRules(id, res.data[0].rules);
+                }
+              });
+              if (res3.code !== 200) {
+                return hui_toast('error', res3.msg);
+              }
+            }
+          });
+        });
+        // ajax产生错误
+        if (res.code !== 200) {
+          return hui_toast('error', res.msg);
+        }
+        form.render();
+      }
+    })
+
+    //提交
+    layui.form.on("submit(data-save)", function (data) {
+      var treecheckdata = tree.getChecked('roldDataId');
+      var nodeIds = new Array();
+      nodeIds = getCheckedId(treecheckdata);
+
+      data.field[PRIMARY_KEY] = PRIMARY_KEY_VALUE;
+      data.field['rules'] = nodeIds;
+
+      layui.$.ajax({
+        url: '/app/admin/role/edit',
+        type: "POST",
+        dateType: "json",
+        data: data.field,
+        success: function (res) {
+          if (res.code !== 200) {
+            return hui_toast('error', res.msg);
+          }
+          return hui_toast('success', "操作成功", function () {
+            //刷新数据表格
+            if (parent.hasOwnProperty('refreshTable')) {
+              refreshTable('roleTable', 2);
+              layer.closeAll('page');
+            }
+          });
+        }
+      });
+
+      return false;
+
+    });
+
+
+    /**
+     * 获取角色数据
+     * @param data
+     */
+    function getRules(id, rules) {
+      layui.$.ajax({
+        url: '/app/admin/role/rules?id=' + id,
+        dataType: 'json',
+        success: function (res4) {
+          res4.data = res4.data || [];
+          tree.render({
+            elem: '#role_ids',
+            data: res4.data,
+            showCheckbox: true,
+            id: 'roldDataId',
+            onlyIconControl: true,
+            showLine: true,
+            oncheck: function (obj) {
+              var childs = $(obj.elem).find('.' + "layui-tree-pack").find('input[same="layuiTreeCheck"]');
+              childs.each(function () {
+                this.checked = false;
+              });
+              form.render('checkbox');
+            }
+          });
+          let ruleValues = rules.split(',');
+          tree.setChecked('roldDataId', ruleValues);
+        }
+      });
+    }
+
+    // 获取tree选中节点的id
+    function getCheckedId(jsonObj) {
+      var id = "";
+      $.each(jsonObj, function (index, item) {
+        if (id != "") {
+          id = id + "," + item.id;
+        } else {
+          id = item.id;
+        }
+        var i = getCheckedId(item.children);
+        if (i != "") {
+          id = id + "," + i;
+        }
+      });
+      return id;
+    }
+
+  });
+</script>

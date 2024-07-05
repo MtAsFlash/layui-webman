@@ -1,0 +1,229 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-row">
+            <form class="layui-form layui-col-md12 layui-form-user" id="user-index-form">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <input type="text" name="id"
+                               placeholder="{:trans('Please enter', ['%s%' => trans('Id',[],'user')])}"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-inline">
+                        <input type="text" name="username"
+                               placeholder="{:trans('Please enter', ['%s%' => trans('Username',[],'user')])}"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-inline">
+                        <input type="text" name="nickname"
+                               placeholder="{:trans('Please enter', ['%s%' => trans('Nickname',[],'user')])}"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-inline">
+                        <input type="text" name="mobile"
+                               placeholder="{:trans('Please enter', ['%s%' => trans('Mobile',[],'user')])}"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-inline">
+                        <input type="text" name="email"
+                               placeholder="{:trans('Please enter', ['%s%' => trans('Email',[],'user')])}"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-inline">
+                        <input type="text" name="score"
+                               placeholder="{:trans('Please enter', ['%s%' => trans('Score',[],'user')])}"
+                               autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-inline" style="width:130px;">
+                        <select name="status">
+                            <option value="">=={:trans('Status')}==</option>
+                            <option value="1">{:trans('Status success')}</option>
+                            <option value="0">{:trans('Status error')}</option>
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <button class="layui-btn layui-btn-md" data-type="reload" lay-submit=""
+                                lay-filter="table-search-user">
+                            <i class="layui-icon layui-icon-search"></i>{:trans('Search')}
+                        </button>
+                        <button class="layui-btn layui-btn-danger layui-btn-md" type="reset"
+                                lay-submit="" lay-filter="table-reset-user">
+                            <i class="layui-icon">&#xe63f;</i>{:trans('Clear')}
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div style="">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table class="layui-hide" id="userTable" lay-filter="userTable"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="userTableToolbar">
+    <button class="layui-btn layui-btn-sm" permission="app.admin.user.add"
+            data-open="/app/admin/user/add" data-title="{:trans('Add...',['%s%'=>trans('User',[],'user')])}">
+        <i class="layui-icon layui-icon-add-1"></i>
+        {:trans('Add')}
+    </button>
+</script>
+
+<script type="text/html" id="userStatusTpl">
+    {{#  if(d.status =='1'){ }}
+    <span class="layui-badge layui-bg-green"> 已启用 </span>
+    {{#  } else { }}
+    <span class="layui-badge layui-bg-danger"> 已禁用 </span>
+    {{#  } }}
+</script>
+<script type="text/html" id="userBarTool">
+    <button class="layui-btn layui-btn-xs" title="{:trans('Edit')}" permission="app.admin.user.edit"
+            data-open="/app/admin/user/edit?id={{d.id}}"
+            data-title="{:trans('Edit')}">{:trans('Edit')}
+    </button>
+    <button class="layui-btn layui-btn-danger layui-btn-xs" title="{:trans('Delete')}"
+            permission="app.admin.user.delete"
+            data-confirm="/app/admin/user/delete" data-data="id={{d.id}}"
+            data-title="{:trans('Are you sure', ['%s%' => trans('Delete')])}" data-reload="1"
+            data-table-id="userTable">
+        {:trans('Delete')}
+    </button>
+</script>
+
+<script>
+  layui.use(['table', 'form', 'util'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var table = layui.table;
+    var util = layui.util;
+    form.render();
+
+    var tableInit = table.render({
+      elem: '#userTable',
+      toolbar: '#userTableToolbar',
+      defaultToolbar: [{
+        layEvent: 'refresh',
+        icon: 'layui-icon-refresh',
+        title: "{:trans('Refresh')}"
+      }, 'filter', 'exports'],
+      method: 'get',
+      url: "/app/admin/user/select",
+      parseData: function (res) {
+        return {
+          "code": 0,
+          "msg": res.msg,
+          "count": res.count,
+          "data": res.data
+        };
+      },
+      cellMinWidth: 60,
+      cols: [[
+        {field: 'id', title: 'ID', width: 60, align: 'center'},
+        {field: 'username', title: "{:trans('Username',[],'user')}"},
+        {field: 'nickname', title: "{:trans('Nickname',[],'user')}"},
+        {
+          title: "{:trans('Sex',[],'user')}",
+          field: "sex",
+          templet: function (d) {
+            if (d.sex == 1) {
+              return "男";
+            } else {
+              return "女";
+            }
+          }
+        },
+        {
+          title: "{:trans('Avatar',[],'user')}",
+          field: "avatar",
+          templet: function (d) {
+            return '<img src="' + encodeURI(d['avatar']) + '" style="max-width:32px;max-height:32px;" alt="" />'
+          }
+        },
+        {
+          title: "{:trans('Email',[],'user')}",
+          field: "email",
+        }, {
+          title: "{:trans('Mobile',[],'user')}",
+          field: "mobile",
+        },
+        {
+          title: "{:trans('Level',[],'user')}",
+          field: "level",
+          hide: true,
+        }, {
+          title: "{:trans('Birthday',[],'user')}",
+          field: "birthday",
+          hide: true,
+        }, {
+          title: "{:trans('Score',[],'user')}",
+          field: "score",
+          hide: true,
+        }, {
+          title: "{:trans('LastTime',[],'user')}",
+          field: "last_time",
+          hide: true,
+        }, {
+          title: "{:trans('LastIp',[],'user')}",
+          field: "last_ip",
+          hide: true,
+        }, {
+          title: "{:trans('JoinTime',[],'user')}",
+          field: "join_time",
+          hide: true,
+        }, {
+          title: "{:trans('JoinIp',[],'user')}",
+          field: "join_ip",
+          hide: true,
+        }, {
+          title: "{:trans('CreateTime')}",
+          field: "create_time",
+          hide: true,
+        }, {
+          title: "{:trans('UpdateTime')}",
+          field: "update_time",
+          hide: true,
+        },
+        {field: 'status', title: "{:trans('Status')}", templet: '#userStatusTpl', align: 'center', width: 100},
+        {fixed: 'right', title: "{:trans('Operation')}", toolbar: '#userBarTool', align: 'center', width: 130}
+      ]],
+      page: true,
+      limit: 10,
+      done: function () {
+        layer.photos({photos: 'div[lay-table-id="userTable"]', anim: 5});
+      }
+    });
+
+    // 表头工具栏工具事件
+    table.on("toolbar(" + tableInit.config.id + ")", function (obj) {
+      if (obj.event === "refresh") {
+        refreshTable(tableInit.config.id, 1);
+      }
+    })
+
+    // 表格顶部搜索事件
+    form.on("submit(table-search-user)", function (data) {
+      table.reload(tableInit.config.id, {
+        where: data.field
+      })
+      return false;
+    });
+    //表格顶部清空时间
+    form.on("submit(table-reset-user)", function (data) {
+      $(".layui-form-user")[0].reset();
+      form.render();
+      table.reload(tableInit.config.id, {
+        where: {}
+      })
+      return false;
+    })
+
+  });
+</script>

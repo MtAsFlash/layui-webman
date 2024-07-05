@@ -1,0 +1,452 @@
+<style>
+    #configUeditorCheckBox .layui-form-checkbox {
+        margin-bottom: 10px;
+    }
+
+    .layui-layer-shade {
+        z-index: 99 !important; /* 降低全局遮罩层的层级值 */
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <blockquote class="layui-elem-quote">
+            全局取值方式： get_config(); 例如，取站点名称：get_config('site_name')
+        </blockquote>
+        <form class="layui-form" action="javascript:;" id="config-index-form">
+            <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+                <ul class="layui-tab-title">
+                    <li class="layui-this">基本设置</li>
+                    <li>安全设置</li>
+                    <li>附件设置</li>
+                </ul>
+                <div class="layui-tab-content" style="margin-top: 10px;">
+                    <!--基本设置-->
+                    <div class="layui-tab-item layui-show">
+                        <table class="layui-table" width="100%">
+                            <thead>
+                            <tr>
+                                <th width="15%">名称</th>
+                                <th>变量值</th>
+                                <th width="12%">变量名</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>站点名称</td>
+                                <td>
+                                    <input type="text" name="site_name" lay-verify="required"
+                                           autocomplete="off" class="layui-input" lay-reqtext="站点名称不能为空">
+                                </td>
+                                <td>site_name</td>
+                            </tr>
+                            <tr>
+                                <td>站点根网址</td>
+                                <td>
+                                    <input type="text" name="site_url" value="" lay-verify="url" autocomplete="off"
+                                           class="layui-input">
+                                </td>
+                                <td>site_url</td>
+                            </tr>
+                            <tr>
+                                <td>网站关键词</td>
+                                <td>
+                                    <input type="text" name="site_keyword" value="" autocomplete="off"
+                                           class="layui-input">
+                                </td>
+                                <td>site_keyword</td>
+                            </tr>
+                            <tr>
+                                <td>网站版权信息</td>
+                                <td>
+                                    <input type="text" name="site_copyright" value=""
+                                           autocomplete="off" class="layui-input">
+                                </td>
+                                <td>site_copyright</td>
+                            </tr>
+                            <tr>
+                                <td>网站备案号</td>
+                                <td>
+                                    <input type="text" name="site_beian" value="" autocomplete="off"
+                                           class="layui-input">
+                                </td>
+                                <td>site_beian</td>
+                            </tr>
+                            <tr>
+                                <td>网站描述</td>
+                                <td>
+                                    <textarea placeholder="统计代码" class="layui-textarea"
+                                              name="site_description"></textarea>
+                                </td>
+                                <td>site_description</td>
+                            </tr>
+                            <tr>
+                                <td>统计代码</td>
+                                <td>
+                                    <textarea placeholder="统计代码" class="layui-textarea"
+                                              name="site_code"></textarea>
+                                </td>
+                                <td>site_code</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!--安全设置-->
+                    <div class="layui-tab-item">
+                        <table class="layui-table">
+                            <thead>
+                            <tr>
+                                <th width="15%">站点名称</th>
+                                <th>变量值</th>
+                                <th width="12%">变量名</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>文本编辑器</td>
+                                <td>
+                                    <div class="layui-input-inline" style="width:200px">
+                                        <select name="site_editor">
+                                            <option value="wangEditor">wangEditor</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td>site_editor</td>
+                            </tr>
+                            <tr>
+                                <td>后台管理操作日志</td>
+                                <td>
+                                    <input type="radio" name="admin_log" value="1" title="开启">
+                                    <input type="radio" name="admin_log" value="0" title="关闭">
+                                </td>
+                                <td>admin_log</td>
+                            </tr>
+                            <tr>
+                                <td>动态口令认证</td>
+                                <td>
+                                    <input type="radio" name="onetime_password" value="1" title="开启"
+                                           lay-filter="RadioOnetimePassword">
+                                    <input type="radio" name="onetime_password" value="0" title="关闭"
+                                           lay-filter="RadioOnetimePassword" checked>
+                                    <button type="submit" class="layui-btn layui-btn-sm layui-btn-primary"
+                                            id="set_onetime_passwrod" lay-submit=""
+                                            lay-filter="set_onetime_passwrod" style="display: none;">设置动态口令
+                                    </button>
+                                </td>
+                                <td>onetime_password</td>
+                            </tr>
+                            <tr>
+                                <td>此ip禁止访问网站</td>
+                                <td>
+                                    <textarea class="layui-textarea" name="admin_prohibit_ip"
+                                              placeholder="匹配IP段用“*”占位，如192.168.*.*，多个IP地址请用英文逗号“,”分割"></textarea>
+                                    <div class="layui-form-mid layui-word-aux">匹配IP段用“*”占位多个IP用“,”分割</div>
+                                </td>
+                                <td>admin_prohibit_ip</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!--附件设置-->
+                    <div class="layui-tab-item">
+                        <table class="layui-table">
+                            <thead>
+                            <tr>
+                                <th width="15%">站点名称</th>
+                                <th>变量值</th>
+                                <th width="12%">变量名</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>允许上传图片类型</td>
+                                <td>
+                                    <input type="text" name="upload_types_image" value="" autocomplete="off"
+                                           class="layui-input"
+                                           placeholder="多个类型用英文逗号“,”分割">
+                                </td>
+                                <td>upload_types_image</td>
+                            </tr>
+                            <tr>
+                                <td>允许上传附件类型</td>
+                                <td>
+                                    <input type="text" name="upload_types_file" value=""
+                                           autocomplete="off" class="layui-input"
+                                           placeholder="多个类型用英文逗号“,”分割">
+                                </td>
+                                <td>upload_types_file</td>
+                            </tr>
+                            <tr>
+                                <td>多图上传图片数量限制</td>
+                                <td>
+                                    <div class="layui-input-inline">
+                                        <input type="number" name="pic_more_nums" value=""
+                                               autocomplete="off" class="layui-input">
+                                    </div>
+                                    <span style="margin-left:10px; color:#f00">[0 为不限制]</span>
+                                </td>
+                                <td>pic_more_nums</td>
+                            </tr>
+                            <tr>
+                                <td>保存方式</td>
+                                <td>
+                                    <div class="layui-input-inline">
+                                        <select name="upload_mode" lay-filter="upload_mode">
+                                            <option value="local">本地保存</option>
+                                            <option value="oss">阿里云 OSS</option>
+                                            <option value="qiniu">七牛云</option>
+                                            <option value="s3">S3</option>
+                                            <option value="cos">腾讯云 COS</option>
+                                            <option value="obs">华为云 OBS</option>
+                                        </select>
+                                    </div>
+                                    <br><span
+                                        style="color:#ff00ea">[非“本地保存”，请在配置文件里对密钥等信息进行配置 <span
+                                        style="font-weight: bold;color:#ff6a00">(config/plugin/yzh52521/filesystem/app.php)</span>，否则上传失败]</span>
+                                </td>
+                                <td>upload_mode</td>
+                            </tr>
+                            <tr>
+                                <td>是否开启图片水印</td>
+                                <td>
+                                    <input type="radio" name="watermark_enable" value="1" title="开启">
+                                    <input type="radio" name="watermark_enable" value="0" title="关闭">
+                                    <span style="margin-left:10px; color:#ff00dd">[水印仅对【本地保存】有效]</span>
+                                </td>
+                                <td>watermark_enable</td>
+                            </tr>
+                            <tr>
+                                <td>水印图片名称</td>
+                                <td>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="watermark_name" value="" autocomplete="off"
+                                               class="layui-input">
+                                        <tip>[水印存放路径:public/static/water]</tip>
+                                    </div>
+                                </td>
+                                <td>watermark_name</td>
+                            </tr>
+                            <tr>
+                                <td>水印的位置</td>
+                                <td>
+                                    <input type="radio" name="watermark_position" value="top-left" title="顶部居左">
+                                    <input type="radio" name="watermark_position" value="top" title="顶部居中">
+                                    <input type="radio" name="watermark_position" value="top-right" title="顶部居右">
+                                    <input type="radio" name="watermark_position" value="left" title="中部居左">
+                                    <input type="radio" name="watermark_position" value="center" title="中部居中">
+                                    <input type="radio" name="watermark_position" value="right" title="中部居右">
+                                    <input type="radio" name="watermark_position" value="bottom-left" title="顶部居左">
+                                    <input type="radio" name="watermark_position" value="bottom" title="底部居中">
+                                    <input type="radio" name="watermark_position" value="bottom-right" title="底部居右">
+                                </td>
+                                <td>watermark_position</td>
+                            </tr>
+                            <tr>
+                                <td>水印透明度</td>
+                                <td>
+                                    <div class="layui-input-inline" style="width:65%;margin:18px 0;">
+                                        <div id="configSlideWaterMark" class="demo-slider"></div>
+                                        <input type="hidden" name="watermark_touming">
+                                    </div>
+                                    <div class="layui-form-mid layui-word-aux">[水印透明度设置]</div>
+                                </td>
+                                <td>watermark_touming</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+            <div class="layui-form-item ">
+                <label class="layui-form-label"></label>
+                <div class="layui-input-inline" style="width: 80%">
+                    <input class="layui-btn" type="submit" value="立即保存" lay-submit="" lay-filter="data-save-config">
+                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="onetime-password-container" id="onetime-password-container" style="display: none;">
+    <form action="layui-form">
+        <div class="onetime_title">
+            <i class="layui-icon layui-icon-about"></i> 风险操作,此功能不懂请勿开启!
+        </div>
+        <div class="onetime_one">
+            <ul>
+                {if(!$php_imagick)}
+                <li>请先安装【php_imagick】扩展</li>
+                {/if}
+                <li>必须要用到且了解此功能才决定自己是否要开启!!</li>
+                <li>如果无法验证，请在_config表中取消动态口令认证</li>
+                <li>开启服务后，请立即绑定，以免出现后台不能登录。</li>
+                <li>请先下载谷歌认证器（腾讯身份验证器等），并完成安装和初始化。</li>
+                <li>此位置绑定为当前登录账户（超管），如需绑定其他账户，请到账户管理中绑定。</li>
+                <li>基于google2fa 开发。</li>
+                <li>请先确定并保存后刷新页面再进行扫码绑定。</li>
+            </ul>
+        </div>
+        <div class="onetime_two layui-form-item">
+            <label for="onetimePasswordCheckbox">
+                <input type="checkbox" name="one_time_password_name" title="选项1" id="onetimePasswordCheckbox">
+                我已安装APP和了解详情，并愿意承担风险。
+            </label>
+        </div>
+    </form>
+</div>
+
+<div class="onetime-password-container" id="set-onetime-password-container" style="display: none;">
+    <div class="onetime_title">
+        扫码绑定（使用身份验证器APP扫码）
+    </div>
+    <div class="onetime_ewm">
+        <center><img id="onetime_ewm_img" src=""/></center>
+    </div>
+    <div class="onetime_one">
+        <ul>
+            <li>开启服务后，请立即使用“Google身份验证器”等APP绑定，以免出现无法登录的情况。</li>
+            <li>同一个IP验证成功后24小时内无需再次验证。</li>
+            <li>各大软件商店均可下载身份验证器APP，支持安卓、IOS系统。</li>
+        </ul>
+    </div>
+</div>
+
+
+<script>
+
+  layui.use(['table', 'form', 'util'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var table = layui.table;
+    var util = layui.util;
+    form.render();
+
+    form.on('radio(RadioOnetimePassword)', function (data) {
+      if (data.value == 1) {
+        layer.open({
+          type: 1,
+          title: '设置动态口令认证',
+          shadeClose: false,
+          closeBtn: 2,
+          shade: 0.6,
+          zIndex: 9947400836407,
+          area: ['440px', '480px'],
+          content: $('#onetime-password-container'),
+          btn: ['确定'],
+          yes: function (index, layero, that) {
+            var checkbox = $('#onetimePasswordCheckbox');
+            var isChecked = checkbox.is(':checked');
+            if (!isChecked) {
+              layer.msg('请勾选并同意承担风险。', {icon: 2});
+              return false;
+            }
+            $('input[name="onetime_password"][value="1"]').prop('checked', true);
+            form.render('radio');
+            layer.close(index);
+          },
+          cancel: function () {
+            $('input[name="onetime_password"][value="0"]').prop('checked', true);
+            form.render('radio');
+          }
+        });
+      }
+    });
+
+    //设置动态口令
+    layui.form.on("submit(set_onetime_passwrod)", function () {
+      layer.open({
+        type: 1,
+        title: '设置动态口令认证',
+        shadeClose: false,
+        closeBtn: 2,
+        shade: 0.6,
+        zIndex: 9947400836408,
+        area: ['550px', '430px'],
+        content: $('#set-onetime-password-container'),
+        success: function () {
+          $.post("/app/admin/config/get", {param: 'onetime_password'}, function (res) {
+            if (res.code !== 200) {
+              return hui_toast('error', res.msg);
+            }
+            $('#onetime_ewm_img').attr('src', 'data:image/png;base64, ' + res.data.qrcode_img);
+          })
+        },
+        cancel: function () {
+
+        }
+      });
+    })
+
+    $.ajax({
+      url: "/app/admin/config/select?limit=5000",
+      dataType: "json",
+      method: "GET",
+      success: function (res) {
+        // 给表单初始化数据
+        layui.each(res.data, function (key, value) {
+          var $targetForm = $('#config-index-form');
+          let obj = $targetForm.find('*[name="' + value.name + '"]');
+          if (typeof obj[0] === "undefined" || !obj[0].nodeName) return;
+          if (obj[0].type === 'textarea') {
+            //文本输入框
+            obj.val(layui.util.escape(value.value));
+          } else if (obj[0].type === 'radio') {
+            //单选按钮
+            layui.$("input[name=" + value.name + "][value=" + value.value + "]").attr("checked", true);
+            if (value.name === 'onetime_password') {
+              let thisValue = value.value;
+              if (thisValue == 1) {
+                $('#set_onetime_passwrod').show();
+              }
+            }
+          } else {
+            if (obj[0].nodeName.toLowerCase() === 'select') {
+              //下拉
+              layui.$("select[name=" + value.name + "]").val(value.value);
+            } else {
+              //其他
+              obj.attr("value", value.value);
+            }
+          }
+        });
+
+        //滑块：水印透明度
+        layui.use(["slider"], function () {
+          var slider = layui.slider;
+          let valueWaterMark = layui.$("input[name='watermark_touming']").attr("value");
+          slider.render({
+            elem: '#configSlideWaterMark',
+            value: valueWaterMark,
+            input: true,
+            theme: 'var(--global-primary-color)',
+            done: function (value) {
+              layui.$("input[name='watermark_touming']").val(value);
+            }
+          });
+        });
+        form.render();
+      }
+    });
+
+    //保存数据
+    layui.form.on("submit(data-save-config)", function (data) {
+      layui.$.ajax({
+        url: '/app/admin/config/edit',
+        type: "POST",
+        dateType: "json",
+        data: data.field,
+        success: function (res) {
+          if (res.code !== 200) {
+            return hui_toast('error', res.msg);
+          }
+          return hui_toast('success', res.msg);
+        }
+      });
+      return false;
+    })
+
+  });
+</script>

@@ -1,0 +1,75 @@
+<div style="">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table class="layui-hide" id="customConfigTable" lay-filter="customConfigTable"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="customConfigTableToolbar">
+    <button class="layui-btn layui-btn-sm" permission="app.admin.customconfig.add"
+            data-open="/app/admin/customconfig/add" data-title="添加自定义配置">
+        <i class="layui-icon layui-icon-add-1"></i>
+        新增
+    </button>
+</script>
+<script type="text/html" id="customConfigBarTool">
+    <button class="layui-btn layui-btn-xs" title="编辑" permission="app.admin.customconfig.edit"
+            data-open="/app/admin/customconfig/edit?name={{d.name}}"
+            data-title="编辑">编辑
+    </button>
+    <button class="layui-btn layui-btn-danger layui-btn-xs" title="删除" permission="app.admin.customconfig.delete"
+            data-confirm="/app/admin/customconfig/delete" data-data="id={{d.id}}"
+            data-title="您确定要删除吗？" data-reload="1" data-table-id="customConfigTable">
+        删除
+    </button>
+</script>
+
+<script>
+  layui.use(['table', 'form', 'util'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var table = layui.table;
+    var util = layui.util;
+    form.render();
+
+    var tableInit = table.render({
+      elem: '#customConfigTable'
+      , toolbar: '#customConfigTableToolbar'
+      , defaultToolbar: [{
+        layEvent: 'refresh',
+        icon: 'layui-icon-refresh',
+        title: '刷新'
+      }, 'filter', 'exports']
+      , method: 'get'
+      , where: {type: 99, without_field: 'value'}
+      , url: "/app/admin/customconfig/select"
+      , parseData: function (res) {
+        return {
+          "code": 0,
+          "msg": res.msg,
+          "count": res.count,
+          "data": res.data
+        };
+      }
+      , cellMinWidth: 100
+      , cols: [[
+        {field: 'id', title: 'ID', width: 60, align: 'center'},
+        {field: 'name', title: '配置名称'},
+        {field: 'title', title: '简洁说明'},
+        {field: 'fieldtype_name', title: '配置类型'},
+        {fixed: 'right', title: '操作', toolbar: '#customConfigBarTool', align: 'center', width: 130}
+      ]]
+      , page: true
+      , limit: 10
+    });
+
+    // 表头工具栏工具事件
+    table.on("toolbar(" + tableInit.config.id + ")", function (obj) {
+      if (obj.event === "refresh") {
+        refreshTable(tableInit.config.id, 1);
+      }
+    })
+
+  });
+</script>
+

@@ -1,0 +1,137 @@
+<div>
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table class="layui-hide" id="ruleTable" lay-filter="ruleTable"></table>
+        </div>
+    </div>
+</div>
+
+<script type="text/html" id="ruleTableTool">
+    <div class="layui-btn-container">
+        <a class="layui-btn layui-btn-sm" data-open="/app/admin/rule/add"
+           data-title="添加" data-reload="1" permission="app.admin.rule.add">
+            <i class="layui-icon layui-icon-add-1"></i>添加
+        </a>
+        <button class="layui-btn layui-btn-sm" lay-event="getChecked">获取选中数据</button>
+    </div>
+</script>
+
+<script type="text/html" id="ruleOptionTpl">
+    <a class="layui-btn layui-btn-xs layui-btn-normal" data-open="/app/admin/rule/add?id={{d.id}}"
+       data-title="添加下级" permission="app.admin.rule.add">添加下级</a>
+    <a class="layui-btn layui-btn-xs layui-btn-success" data-open="/app/admin/rule/edit?id={{d.id}}"
+       data-title="编辑" permission="app.admin.rule.edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" data-confirm="/app/admin/rule/delete"
+       data-data="id={{d.id}}" permission="app.admin.rule.delete" data-title="确定要删除吗？" data-reload="1"
+       data-table-id="ruleTable" data-table-type="2">删除</a>
+</script>
+<script>
+  layui.use(['table', 'util'], function () {
+    var $ = layui.jquery;
+    var treeTable = layui.treeTable;
+    var util = layui.util;
+
+    let apiResults = {};
+    apiResults["type"] = ["目录", "菜单", "权限"];
+
+    // 渲染
+    var tableInit = treeTable.render({
+      elem: '#ruleTable',
+      url: '/app/admin/rule/select?limit=5000&format=table_tree',
+      toolbar: '#ruleTableTool',
+      defaultToolbar: [{
+        title: "刷新",
+        layEvent: "refresh",
+        icon: "layui-icon-refresh",
+      }, "filter", "print"],
+      parseData: function (res) {
+        return {
+          "code": 0,
+          "msg": res.msg,
+          "count": 500,
+          "data": res.data
+        };
+      },
+      tree: {
+        customName: {name: "title", pid: 'pid', icon: false},
+        view: {showIcon: false}
+      },
+      cols: [[
+        {type: 'checkbox', fixed: 'left'},
+        {field: 'id', title: 'ID', width: 80, align: "center"},
+        {field: 'title', title: '标题', width: 180},
+        {
+          field: 'icon', title: '图标', width: 70, align: "center", templet: function (d) {
+            return '<i class="layui-icon ' + util.escape(d["icon"]) + '"></i>';
+          }
+        },
+        {field: 'key', title: 'key'},
+        {field: "weight", title: "排序", width: 80, align: "center", edit: 'text'},
+        {
+          title: "类型",
+          field: "type",
+          width: 80,
+          align: "center",
+          templet: function (d) {
+            let field = "type";
+            let value = apiResults["type"][d["type"]] || d["type"];
+            let css = {"目录": "layui-bg-blue", "菜单": "layui-bg-green", "权限": "layui-bg-orange"}[value];
+            return '<span class="layui-badge ' + css + '">' + util.escape(value) + '</span>';
+          }
+        },
+        {fixed: "right", title: "操作", width: 190, align: "center", toolbar: "#ruleOptionTpl"}
+      ]],
+      page: false,
+      done: function () {
+        //处理一级节点展开
+        var datas = treeTable.getData(tableInit.config.id);
+        expandNodes(datas);
+      }
+    });
+
+    // 表头工具栏工具事件
+    treeTable.on("toolbar(" + tableInit.config.id + ")", function (obj) {
+      var config = obj.config;
+      var tableId = config.id;
+      var status = treeTable.checkStatus(tableId);
+      //刷新
+      if (obj.event === "refresh") {
+        refreshTable(tableInit.config.id, 2);
+      } else if (obj.event === "getChecked") {
+        if (!status.data.length) return layer.msg('无选中数据');
+        console.log(status);
+        layer.alert("当前数据选中已经输出到控制台，<br>您可按 F12 从控制台中查看结果。");
+      }
+    });
+    treeTable.on('edit(' + tableInit.config.id + ')', function (obj) {
+      var value = obj.value
+        , data = obj.data;
+      $.post("/app/admin/rule/edit", {id: data.id, weight: value}, function (res) {
+        if (res.code === 200) {
+          layer.msg(res.msg, {time: 1500, icon: 1}, function () {
+            location.reload();
+          });
+        } else {
+          layer.msg(res.msg, {time: 1500, icon: 2});
+        }
+      })
+    });
+
+    //自定义函数 递归展开满足指定条件的 节点
+    function expandNodes(data) {
+      $.each(data, function (index, item) {
+        if (item.type < 1) {
+          // 设置展开或关闭对应节点
+          treeTable.expandNode(tableInit.config.id, {
+            index: item.LAY_DATA_INDEX,     // 节点 行号
+            expandFlag: true                // 展开
+          });
+          if (item.children !== "undefined") {
+            expandNodes(item.children);
+          }
+        }
+      });
+    }
+
+  });
+</script>

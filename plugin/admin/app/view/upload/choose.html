@@ -1,0 +1,298 @@
+<div class="main-container-choose" style="max-width:1200px;margin:0 auto">
+    <form class="layui-form file-library">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-sm3">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                <span class="layui-badge layui-bg-blue"
+                      style="width:93%;line-height:30px; height: 30px;">文件分组</span>
+                        <div id="ID-tree-demo-showCheckbox"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-col-sm9">
+                <div class="layui-card">
+                    <div class="layui-card-body layui-layer-content" style="overflow: hidden;">
+                        <div class="layui-form-item" style="position: fixed;z-index:100000;">
+                            <input type="hidden" value="0" name="group_id" id="ID-input-choose-group-id">
+                            <div class="layui-inline">
+                                <button type="button" class="layui-btn"
+                                        id="ID-choose-upload">
+                                    <i class="layui-icon"></i>上传图片
+                                </button>
+                            </div>
+                            <div class="layui-inline">共有图片：
+                                <span id="ID-choose-img-total" style="font-weight: bold;color:#f00"></span> 张
+                            </div>
+                        </div>
+                        <div class="flow-choose-files" id="ID-flow-choose-files"
+                             style="max-width:960px;overflow: auto;margin-top:50px;">
+                            <ul class="file-list-item"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bottom">
+            <div class="button-container">
+                <a class="layui-btn layui-btn-sm btn-choose-sure">
+                    <i class="layui-icon layui-icon-ok"></i>确定
+                </a>
+                <!--<button class="layui-btn layui-btn-primary layui-btn-sm" onclick="closeChoose()">
+                    <i class="layui-icon layui-icon-close"></i>
+                    关闭
+                </button>-->
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+  layui.use(['table', 'form', 'jquery', 'upload'], function () {
+    let form = layui.form;
+    let $ = layui.jquery;
+    let tree = layui.tree;
+    let flow = layui.flow;
+    let upload = layui.upload;
+    let element = layui.element;
+    /**
+     * 右侧图片流高度
+     * @type {*|jQuery}
+     */
+    let s_height = $(window).height();
+    let content_height = Number(s_height) - 200;
+    layui.$('.flow-choose-files').css('max-height', content_height);
+    //默认分组id（全部）
+    window.groupId = -1;
+    window.inputType = "{:request()->get('type')}";
+    window.inputSelectId = "{:request()->get('select_id')}";
+
+    //获取数据分组
+    uploadGroupList();
+    //数据流加载
+    flowFileList(groupId);
+    //上传图片事件
+    uploadFile();
+    form.render();
+
+    $('.file-library').on('click', '.btn-choose-sure', function () {
+      let selectedList = getSelectedFiles();
+      let input_type = inputType;
+      let input_select_id = inputSelectId;
+      if (selectedList.length === 0) {
+        return hui_toast('error', '请先选择附件');
+      }
+      let input = '#' + input_select_id;
+
+      if (input_type === 'one') {
+        let str = '';
+        let url = selectedList[0]['file_path'];
+        //单图选择
+        $(input).val(url);
+        str += '<dl>';
+        str += '<dt><img src="' + url + '" data-url="' + url + '" onclick="bigMapImg(\'#' + input_select_id + '_box\')"></dt>';
+        str += '<dd>删除</dd>';
+        str += '</dl>';
+        $('#' + input_select_id + '_box').html(str);
+      } else {
+        //多图选择
+        var i1 = 0;
+        var getItemLength = parseInt($(input).find('.file-item').length);
+        //多图上传数量限制，0为不限制
+        var pic_nums = "{:get_config('pic_more_nums');}";
+        let pidDataName = $(input).attr('data-name');
+        let str = '';
+        $.each(selectedList, function (i, val) {
+          if (pidDataName.trim().length < 1) {
+            pidDataName = 'params[thumbs][]';
+          }
+          let find = $(input).find('.file-item-id-' + val.file_id).html();
+          if (typeof (find) === 'undefined') {
+            i1 += 1;
+            str += ' <div class="file-item file-item-id-' + val.file_id + '">\n' +
+              '    <img src="' + val.file_path + '" onclick="bigMapImg(\'#' + input_select_id + '\')">\n' +
+              '    <input type="hidden" name="' + pidDataName + '" value="' + val.file_path + '">\n' +
+              '    <i class="layui-icon layui-icon-close file-item-delete" onclick="fileItemDelete(' + val.file_id + ')"></i>\n' +
+              '</div>';
+          }
+        });
+        var check_length = i1;
+        if (pic_nums > 0 && pic_nums < (check_length + getItemLength)) {
+          return hui_toast('error', '文件最大同时选择数为：' + pic_nums);
+        }
+        $(input).append(str);
+        $(input).attr('data-nums', (check_length + getItemLength));
+      }
+      closeChoose();
+    });
+
+    //上传图片
+    function uploadFile() {
+      upload.render({
+        elem: '#ID-choose-upload',
+        url: GV.upload_url,
+        data: {
+          group_id: function () {
+            return layui.$('#ID-input-choose-group-id').val();
+          }
+        },
+        before: function (obj) {
+          element.progress('choose-upload-filter', '0%'); // 进度条复位
+          layer.msg('上传中', {icon: 16, time: 0});
+        },
+        done: function (res) {
+          if (res.code === 200) {
+            flowFileList(layui.$('#ID-input-choose-group-id').val());
+          }
+        },
+        error: function (res, index, upload) {
+          alert('上传错误，超出服务器大小限制');
+          return false;
+        },
+        progress: function (n, elem, res, index) {
+          element.progress('choose-upload-filter', n + '%'); // 可配合 layui 进度条元素使用
+          if (n === 100) {
+            layer.msg('上传完毕', {icon: 1});
+          }
+        }
+      });
+    }
+
+    //获取分组数据
+    function uploadGroupList() {
+      layui.$.ajax({
+        url: "/app/admin/upload/upload_group",
+        dataType: "json",
+        success: function (res) {
+          if (res.code !== 200) {
+            return hui_toast('error', res.msg);
+          }
+          //左边tree显示
+          tree.render({
+            elem: '#ID-tree-demo-showCheckbox',
+            data: res.data,
+            onlyIconControl: true,
+            click: function (obj) {
+              window.groupId = obj.data.id;
+              $('#ID-input-choose-group-id').val(obj.data.id);
+              $('.layui-tree-lineExtend').find('div').css('background', 'none');
+              $('.layui-tree-lineExtend div').find('span').css('color', 'inherit');
+              flowFileList(obj.data.id); //执行流加载
+              obj.elem.css('background', 'var(--global-primary-color)');
+              obj.elem.find('span').css('color', '#fff');
+            }
+          });
+        }
+      });
+    }
+
+
+    /**
+     * 右侧数据流加载
+     */
+    function flowFileList(groupId = -1) {
+      $("#ID-flow-choose-files ul").remove();
+      $('#ID-flow-choose-files').unbind();//把容器的事件解除绑定
+      $('#ID-flow-choose-files').append('<ul class="file-list-item"></ul>');
+      flow.load({
+        elem: '#ID-flow-choose-files ul', // 流加载容器
+        scrollElem: '#ID-flow-choose-files',
+        isAuto: true,
+        end: '---我也是有底线的---',
+        mb: 200,
+        done: function (page, next) { // 执行下一页的回调
+          setTimeout(function () {
+            $.ajax({
+              type: "post",
+              url: "/app/admin/uploadfile/select?type=1&field=id&order=desc&group_id=" + groupId + "&page=" + page,
+              dataType: "json",
+              success: function (res) {
+                if (res.code !== 200) {
+                  return hui_toast('error', res.msg);
+                }
+                let lis = [];
+                totalitem = res.count;
+                $('#ID-choose-img-total').html(totalitem);
+                let pageItem = (Math.ceil(totalitem / 10));
+                layui.each(res.data, function (index, item) {
+                  lis.push('<li class="ng-scope" title="' + item.file_name + '" data-file-id="' + item.id + '"\n' +
+                    '    data-file-path="' + item.file_url + '">\n' +
+                    '    <div class="img-cover"\n' +
+                    '         style="background-image: url(' + item.file_url + ')">\n' +
+                    '    </div>\n' +
+                    '    <p class="file-name am-text-center am-text-truncate">\n' +
+                    '        ' + item.file_name + '</p>\n' +
+                    '    <div class="select-mask">\n' +
+                    '        <img src="__STATIC_ADMIN__/images/chose.png">\n' +
+                    '    </div>\n' +
+                    '</li>');
+                });
+                next(lis.join(''), page < pageItem);
+              }
+            });
+          }, 300)
+        }
+      });
+      //点击图片选中事件 加载新数据后重新绑定事件
+      selectFilesEvent();
+    }
+
+    /**
+     * 注册文件选中事件
+     */
+
+    function selectFilesEvent() {
+      // 绑定文件选中事件
+      let checkNum = 0;
+      $('#ID-flow-choose-files .file-list-item').on('click', 'li', function () {
+        $(this).toggleClass('active');
+        let hasActive = $(this).hasClass('active');
+        if (hasActive === true) {
+          checkNum += 1;
+        } else {
+          checkNum -= 1;
+        }
+        if (inputType === 'one' && checkNum > 1) {
+          $(this).addClass("active").siblings().removeClass("active");
+        }
+      })
+    }
+
+
+    /**
+     * 获取选中的文件的ID集
+     * @returns {Array}
+     */
+    function getSelectedFileIds() {
+      let fileList = getSelectedFiles();
+      let data = [];
+      fileList.forEach(function (item) {
+        data.push(item.file_id);
+      });
+      return data;
+    }
+
+    /**
+     * 获取选中的文件列表
+     * @returns {Array}
+     */
+    function getSelectedFiles() {
+      let selectedList = [];
+      $('.file-list-item > li.active').each(function (index) {
+        let $this = $(this);
+        selectedList[index] = {
+          file_id: $this.data('file-id')
+          , file_path: $this.data('file-path')
+        };
+      });
+      return selectedList;
+    }
+
+    //关闭
+    window.closeChoose = function () {
+      layer.closeLast('page');
+    }
+
+  })
+</script>

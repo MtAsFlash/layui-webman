@@ -1,0 +1,376 @@
+<style>
+    .icon {
+        width: 20px;
+        height: 20px;
+        vertical-align: -0.15em;
+        fill: currentColor;
+        overflow: hidden;
+        font-size: 2.5rem;
+        margin-right: 5px;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-row top-search-from">
+            <form class="layui-form layui-col-md12 layui-form-upload-file">
+                <div class="layui-form-item">
+                    <div class="layui-inline" style="width:180px;">
+                        <select name="group_id" id="search-upload-file-group-id">
+                        </select>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">时间范围</label>
+                        <div class="layui-inline">
+                            <div class="layui-input-inline">
+                                <input type="text" autocomplete="off" id="ID-upload-file-laydate-range"
+                                       class="layui-input" placeholder=" - " name="create_time">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <button class="layui-btn layui-btn-md" data-type="reload" lay-submit=""
+                                lay-filter="table-search-upload-file">
+                            <i class="layui-icon layui-icon-search"></i>搜索
+                        </button>
+                        <button class="layui-btn layui-btn-danger layui-btn-md" type="reset"
+                                lay-submit="" lay-filter="table-reset-upload-file">
+                            <i class="layui-icon">&#xe63f;</i>清空
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table class="layui-hide" id="uploadFileTable" lay-filter="uploadFileTable"></table>
+    </div>
+</div>
+
+<!--移动分组框-->
+<form class="layui-form" id="ID-Upload-File-Edit-Group" style="display: none">
+    <div class="main-container">
+        <div class="layui-form-item">
+            <input type="hidden" name="ids" id="ID-ID-Upload-File-Edit-inputids" value="">
+        </div>
+        <div class="layui-form-item" style="margin-right:45px;">
+            <label class="layui-form-label" style="width:inherit">选择分组</label>
+            <div class="layui-input-block" style="margin-left:60px;">
+                <select class="" name="group_id" id="upload-file-edit-group"></select>
+            </div>
+        </div>
+        <div class="bottom1" style="margin-top:100px;">
+            <div class="button-container" style="margin-right:45px;">
+                <button type="submit" class="layui-btn layui-btn-sm" lay-submit=""
+                        lay-filter="data-save-edit-group">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!--上传框-->
+<form class="layui-form" id="ID-Upload-File-Upload" style="display: none">
+    <div class="main-container">
+        <div class="layui-form-item" style="margin-right:45px;">
+            <label class="layui-form-label" style="width:inherit">选择分组</label>
+            <div class="layui-input-block" style="margin-left:60px;">
+                <select class="" name="group_id" id="upload-file-upload-group"></select>
+            </div>
+        </div>
+        <div class="layui-form-item" style="margin-right:45px;">
+            <label class="layui-form-label required" style="width:inherit">文件</label>
+            <div class="layui-input-inline">
+                <button type="button" class="layui-btn layui-btn-normal" id="ID-upload-file-choose-file">上传文件
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/html" id="uploadFileTableToolbar">
+    <button class="layui-btn layui-btn-sm" permission="app.admin.uploadfile.add"
+            lay-event="getCheckedAdd">
+        <i class="layui-icon layui-icon-add-1"></i>
+        上传
+    </button>
+    <button class="layui-btn layui-btn-danger layui-btn-sm" permission="app.admin.uploadfile.delete"
+            lay-event="getCheckedDelete">
+        <i class="layui-icon layui-icon-delete"></i>删除
+    </button>
+    <button class="layui-btn layui-btn-sm layui-bg-purple" permission="app.admin.uploadfile.edit"
+            lay-event="getCheckedEdit" data-title="移动分组">
+        移动分组
+    </button>
+</script>
+<script type="text/html" id="iconTpl">
+    <svg class="icon" aria-hidden="true">
+        <use xlink:href="{{d.icon}}"></use>
+    </svg>
+</script>
+<script type="text/html" id="uploadFileBarTool">
+    <a class="layui-btn layui-btn-xs layui-bg-blue" title="下载" permission="app.admin.uploadfile.download" href="/app/admin/uploadfile/download?url={{d.file_url}}">下载
+    </a>
+    <button class="layui-btn layui-btn-xs" title="编辑" permission="app.admin.uploadfile.edit"
+            lay-event="getCheckedEdit" data-title="编辑">编辑
+    </button>
+    <button class="layui-btn layui-btn-danger layui-btn-xs" title="删除" permission="app.admin.uploadfile.delete"
+            data-confirm="/app/admin/uploadfile/delete" data-data="id={{d.id}}"
+            data-title="您确定要删除吗？" data-reload="1" data-table-id="uploadFileTable">
+        删除
+    </button>
+</script>
+
+<script src="__STATIC_ADMIN__/js/iconfont.js"></script>
+<script>
+  layui.use(['table', 'form', 'util', 'common', 'layer'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var table = layui.table;
+    var util = layui.util;
+    var layer = layui.layer;
+    var laydate = layui.laydate;
+    var common = layui.common;
+    form.render();
+    laydate.render({
+      elem: '#ID-upload-file-laydate-range',
+      type: 'date',
+      range: true,
+      rangeLinked: true
+    });
+
+    //上传
+    layui.upload.render({
+      elem: "#ID-upload-file-choose-file",
+      accept: "file",
+      url: "/app/admin/upload/upload",
+      data: {
+        group_id: function () {
+          return layui.$('#upload-file-upload-group').val();
+        }
+      },
+      field: "__file__",
+      done: function (res) {
+        if (res.code !== 200) {
+          return hui_toast('error', res.msg);
+        }
+        refreshTable(tableInit.config.id, 1);
+        layer.closeLast('page');
+      }
+    });
+
+    var tableInit = table.render({
+      elem: '#uploadFileTable',
+      toolbar: '#uploadFileTableToolbar',
+      defaultToolbar: [{
+        layEvent: 'refresh',
+        icon: 'layui-icon-refresh',
+        title: '刷新'
+      }, 'filter', 'exports'],
+      method: 'get',
+      url: "/app/admin/uploadfile/select?field=id&order=desc",
+      parseData: function (res) {
+        return {
+          "code": 0,
+          "msg": res.msg,
+          "count": res.count,
+          "data": res.data
+        };
+      },
+      cellMinWidth: 100,
+      cols: [[
+        {type: 'checkbox', fixed: 'left'},
+        {field: 'id', title: 'ID', minWidth: 80, align: 'center'},
+        {
+          field: 'file_url', title: '文件', minWidth: 100, align: 'center', templet: function (d) {
+            if (["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"].indexOf(d.extension.toLowerCase()) !== -1) {
+              return '<img src="' + encodeURI(d['file_url']) + '" style="max-width:35px;max-height:35px;" />';
+            }
+            return '<a href="' + encodeURI(d['file_url']) + '" target="_blank">' + util.escape(d['file_url']) + '</a>';
+          }
+        },
+        {
+          field: 'file_size', title: '文件大小', minWidth: 120, align: 'center', templet: function (d) {
+            return formatSize(d.file_size);
+          }
+        },
+        {field: 'image_width', title: '图片宽度', minWidth: 90, align: 'center'},
+        {field: 'image_height', title: '图片高度', minWidth: 90, align: 'center'},
+        {field: 'extension', title: '扩展名', minWidth: 90, align: 'center'},
+        {field: 'icon', title: '扩展图标', minWidth: 90, align: 'center', templet: '#iconTpl'},
+        {field: 'storage', title: '存储位置', minWidth: 90, align: 'center'},
+        {field: 'group_name', title: '分组', minWidth: 100, align: 'center'},
+        {field: 'create_time', title: '上传时间', width: 170, align: 'center'},
+        {fixed: 'right', title: '操作', toolbar: '#uploadFileBarTool', align: 'center', width: 170}
+      ]],
+      page: true,
+      limit: 10,
+      done: function () {
+        layer.photos({photos: 'div[lay-table-id="uploadFileTable"]', anim: 5});
+      }
+    });
+    table.on("tool(" + tableInit.config.id + ")", function (obj) {
+      console.log(obj)
+      var targetValue = obj.data.group_id;
+      $('#ID-ID-Upload-File-Edit-inputids').val(obj.data.id);
+      if (obj.event === 'getCheckedEdit') {
+        var filter = 'upload-file-edit-group';
+        var targetOption = $("#" + filter + " option[value='" + targetValue + "']");
+        if (targetOption.length > 0) {
+          $("#" + filter).val(targetValue);
+          form.render('select');
+        }
+
+        layer.open({
+          type: 1,
+          area: ['450px', '350px'],
+          title: "移动到分组1",
+          content: $('#ID-Upload-File-Edit-Group'),
+          zIndex: 100
+        })
+      } else if (obj.event === 'getCheckedDownload') {
+        //下载附件
+        var url = "/app/admin/uploadfile/download?" + url + "=" + obj.data.file_url;
+        window.open(url);
+      }
+
+
+    })
+
+    // 表头工具栏工具事件
+    table.on("toolbar(" + tableInit.config.id + ")", function (obj) {
+      var config = obj.config;
+      var tableId = config.id;
+      var status = table.checkStatus(tableId);
+      if (obj.event === "refresh") {
+        refreshTable(tableInit.config.id, 1);
+      } else if (obj.event === "getCheckedDelete") {
+        //删除
+        if (!status.data.length) return layer.msg('无选中数据');
+        let checkIds = common.checkField(obj, "id");
+        doRemove(checkIds.split(","));
+      } else if (obj.event === "getCheckedEdit") {
+        //移动分组
+        if (!status.data.length) return layer.msg('无选中数据');
+        let checkIds = common.checkField(obj, "id");
+
+        $('#ID-ID-Upload-File-Edit-inputids').val(checkIds);
+        layer.open({
+          type: 1,
+          area: ['450px', '350px'],
+          title: "移动到分组",
+          content: $('#ID-Upload-File-Edit-Group'),
+          zIndex: 100
+        })
+      } else if (obj.event === "getCheckedAdd") {
+        //上传框
+        layer.open({
+          type: 1,
+          area: ['450px', '350px'],
+          title: "上传附件",
+          content: $('#ID-Upload-File-Upload'),
+          zIndex: 100
+        })
+      }
+    })
+    // 表格顶部搜索事件
+    form.on("submit(table-search-upload-file)", function (data) {
+      table.reload(tableInit.config.id, {
+        where: data.field
+      })
+      return false;
+    });
+    //表格顶部清空
+    form.on("submit(table-reset-upload-file)", function (data) {
+      $(".layui-form-upload-file")[0].reset();
+      form.render();
+      table.reload(tableInit.config.id, {
+        where: {}
+      })
+      return false;
+    })
+
+    form.on("submit(data-save-edit-group)", function (data) {
+      $.ajax({
+        method: "POST",
+        url: '/app/admin/uploadfile/edit',
+        data: data.field,
+        dataType: "json",
+        success: function (res) {
+          if (res.code !== 200) {
+            return hui_toast('error', res.msg);
+          }
+          return hui_toast('success', "操作成功", function () {
+            //刷新数据表格
+            var filter = 'upload-file-edit-group';
+            var defaultOption = $("#" + filter + " option:first-child");
+            $("#" + filter).val(defaultOption.val())
+            form.render('select');
+
+            refreshTable(tableInit.config.id, 1);
+            layer.closeLast('page');
+          })
+        }
+      })
+      return false;
+    })
+
+    // 执行删除
+    let doRemove = function (ids) {
+      let data = {};
+      data["id"] = ids;
+      layer.confirm("确定删除?", {
+        icon: 3,
+        title: "提示"
+      }, function (index) {
+        layer.close(index);
+        let loading = layer.load();
+        $.ajax({
+          url: "/app/admin/uploadfile/delete",
+          data: data,
+          dataType: "json",
+          type: "post",
+          success: function (res) {
+            layer.close(loading);
+            if (res.code !== 200) {
+              return hui_toast('error', res.msg);
+            }
+            return hui_toast('success', res.msg, function () {
+              refreshTable(tableInit.config.id, 1)
+            });
+          }
+        })
+      });
+    }
+
+    //获取分组列表数据
+    let apiResults = {};
+    layui.$.ajax({
+      url: "/app/admin/upload/upload_group",
+      dataType: "json",
+      success: function (res) {
+        if (res.code !== 200) {
+          return hui_toast('error', res.msg);
+        }
+        let str = '';
+        let str1 = '<option value="">请选择分组</option>';
+        layui.each(res.data[0].children, function (k, v) {
+          str += '<option value="' + v.id + '">' + v.name + '</option>';
+        })
+        layui.$('#search-upload-file-group-id').html(str1 + str);
+        layui.$('#upload-file-edit-group').html(str);
+        layui.$('#upload-file-upload-group').html(str);
+        form.render('select');
+      }
+    })
+
+  });
+</script>

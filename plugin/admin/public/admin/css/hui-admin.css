@@ -1,0 +1,589 @@
+*[permission] {
+    display: none;
+}
+
+body .readonly-bg {
+    background: #eeeeeeb3;
+}
+
+/*更改layui部分默认颜色为主题颜色*/
+.layui-laypage .layui-laypage-curr .layui-laypage-em {
+    background-color: var(--global-primary-color);
+}
+
+.layui-form-select dl dd.layui-this {
+    color: var(--global-primary-color);
+}
+
+.layui-input:focus, .layui-textarea:focus {
+    border-color: var(--global-primary-color) !important;
+}
+
+.layui-tab-brief > .layui-tab-title .layui-this {
+    color: var(--global-primary-color);
+}
+
+.layui-tab-brief > .layui-tab-more li.layui-this:after, .layui-tab-brief > .layui-tab-title .layui-this:after {
+    border-bottom: 2px solid var(--global-primary-color);
+}
+
+.layui-form-radio:hover > *, .layui-form-radioed, .layui-form-radioed > i {
+    color: var(--global-primary-color);
+}
+
+.layui-elem-quote {
+    border-left: 5px solid var(--global-primary-color);
+}
+
+.layui-form-checked[lay-skin=primary] > i {
+    border-color: var(--global-primary-color) !important;
+    background-color: var(--global-primary-color);
+    color: #fff;
+}
+
+/*end*/
+
+.main-container {
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: transparent;
+    width: 100%;
+    position: relative;
+    margin-bottom: 45px;
+}
+
+.layui-form .layui-form-item .layui-input-inline {
+    margin-left: 10px !important;
+}
+
+.layui-form .layui-form-item .layui-form-label {
+    width: 110px !important;
+}
+
+.layui-input-block-flex {
+    display: flex;
+}
+
+.layui-form .layui-form-item > .layui-input-block {
+    margin-left: 150px !important;
+}
+
+
+.layui-form .layui-form-item .layui-input-inline {
+    margin-left: 10px !important;
+}
+
+.layui-form .layui-form-item tip {
+    display: inline-block;
+    margin-top: 10px;
+    line-height: 10px;
+    font-size: 13px;
+    color: var(--global-primary-color);
+    margin-left: 10px;
+    line-height: 16px;
+}
+
+.mode_select > tip, .mode_radio > tip {
+    display: inline-block;
+    line-height: 35px;
+    font-size: 12px;
+    color: #ef5c73;
+}
+
+/**必填红点 */
+.layui-form .layui-form-item > .required:after {
+    content: '*';
+    color: red;
+    position: absolute;
+    margin-left: 4px;
+    font-weight: bold;
+    line-height: 1.8em;
+    top: 6px;
+    right: 5px;
+}
+
+.layui-form .bottom {
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 50px;
+    line-height: 50px;
+    background-color: #F8F8F8;
+    border-top: 1px solid #eee;
+}
+
+.button-container {
+    position: absolute;
+    right: 15px;
+}
+
+.hui-userinfo-avatar-show .avatar {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto;
+    position: relative;
+    cursor: pointer;
+}
+
+.hui-userinfo-avatar-show .avatar i {
+    position: absolute;
+    left: -3px;
+    top: -3px;
+    bottom: -3px;
+    right: -3px;
+    border: 4px solid #ecab18;
+    border-right-color: #5fb878;
+    border-bottom-color: #5fb878;
+    border-radius: 50%;
+    -webkit-transition: all .5s;
+    transition: all .5s;
+}
+
+.hui-userinfo-avatar-show .avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.hui-userinfo-avatar-show .avatar:hover .cover {
+    opacity: 1;
+}
+
+.hui-userinfo-avatar-show .avatar .cover {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 90px;
+    color: #eee;
+    opacity: 0;
+    transition: all .5s;
+    font-size: 13px;
+}
+
+.hui-userinfo-avatar-show .avatar:hover i {
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+/*首页右下角登录成功提示框*/
+.login-success-box {
+    width: 90%;
+    margin: 10px auto 0;
+}
+
+.login-success-box-td {
+    width: 50px;
+    background-color: #f6f6f6;
+    text-align: center;
+}
+
+/*缩略图下方图片显示*/
+.upload_pic_box {
+}
+
+.upload_pic_box dl {
+    float: left;
+    position: relative;
+}
+
+.upload_pic_box img {
+    max-height: 100px;
+    margin: 5px 0;
+    margin-right: 5px;
+}
+
+.upload_pic_box dl dd {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+    cursor: pointer;
+    background: #ff4d24;
+    color: #fff;
+    padding: 2px 5px;
+    z-index: 1000;
+}
+
+/*多图选择*/
+.uploader-list .file-item {
+    float: left;
+    width: 100px;
+    position: relative;
+    margin: 20px 20px 0 0;
+    padding: 4px;
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+.uploader-list .file-item img {
+    width: 100px;
+    height: 100px;
+}
+
+.uploader-list .file-item .error {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: 4px;
+    background: red;
+    color: white;
+    text-align: center;
+    height: 20px;
+    font-size: 1.3rem;
+    line-height: 23px;
+}
+
+.uploader-list .file-item:hover .file-item-delete {
+    display: block;
+}
+
+.uploader-list .file-item .file-item-delete {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    cursor: pointer;
+    height: 22px;
+    width: 22px;
+    line-height: 22px;
+    background: rgba(153, 153, 153, 0.7);
+    border-radius: 50%;
+    text-align: center;
+    color: #fff !important;
+    display: none;
+}
+
+.uploader-list .file-item .file-item-delete:hover {
+    background: #000;
+}
+
+/*选择图片页面-choose*/
+.file-library .layui-layer-content .flow-choose-files ul.file-list-item {
+    overflow-y: auto;
+    margin-top: 20px;
+}
+
+.file-library .layui-layer-content .flow-choose-files ul.file-list-item li {
+    position: relative;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    float: left;
+    margin: 7px;
+    height: 145px;
+    overflow: hidden;
+    -webkit-transition: All 0.2s ease-in-out;
+    -moz-transition: All 0.2s ease-in-out;
+    -o-transition: All 0.2s ease-in-out;
+    transition: All 0.2s ease-in-out;
+}
+
+.file-library .layui-layer-content .flow-choose-files .file-list-item li:hover {
+    border: 1px solid #16bce2;
+}
+
+.file-library .layui-layer-content .flow-choose-files .file-list-item li .img-cover {
+    width: 120px;
+    height: 120px;
+    background: no-repeat center center / 100%;
+}
+
+.file-library .layui-layer-content .flow-choose-files .file-list-item li p.file-name {
+    margin: 5px 0 0 0;
+    width: 120px;
+    font-size: 13px;
+}
+
+.file-library .layui-layer-content .flow-choose-files .file-list-item li.active .select-mask {
+    display: block;
+}
+
+.file-library .layui-layer-content .flow-choose-files .file-list-item li .select-mask {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+    text-align: center;
+    border-radius: 6px;
+}
+
+.file-library .layui-layer-content .flow-choose-files ul.file-list-item li .select-mask img {
+    position: absolute;
+    top: 50px;
+    left: 45px;
+}
+
+.file-library .layui-layer-content .flow-choose-files ul.pagination {
+    margin: 0;
+}
+
+.file-library .layui-layer-content .flow-choose-files ul.pagination > li > a, .file-library .layui-layer-content .flow-choose-files ul.pagination > li > span {
+    padding: 3px 9px;
+    font-size: 13px;
+}
+
+/**插件升级弹出层 */
+.upgrade-popup {
+    width: 400px;
+    height: 540px;
+    display: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    background-image: url('../images/upgrade_page_bg.png');
+    background-size: 101% 101%;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: fixed;
+}
+
+/** 弹出层关闭按钮样式 */
+#upgrade-closePopupBtn {
+    position: absolute;
+    right: -16px;
+    top: 50px;
+
+}
+
+#upgrade-closePopupBtn i {
+    font-size: 40px;
+    color: #fff;
+    transition: transform 1s;
+    width: 25px;
+    height: 25px;
+    border: 2px solid #fff;
+    border-radius: 50%; /* 将外层圆圈改为圆形 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#upgrade-closePopupBtn i::before {
+    margin-left: -4px;
+    content: "×";
+    color: #fff;
+}
+
+#upgrade-closePopupBtn i:hover {
+    transform: rotate(300deg);
+}
+
+.upgrade-popup h3 {
+    position: absolute;
+    top: 85px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.upgrade-popup .upgrade-box {
+    position: absolute;
+    bottom: 10px;
+    width: 390px;
+    height: 390px;
+    left: 50%;
+    margin-left: -195px;
+    color: #555;
+}
+
+.upgrade-popup .upgrade-box-title h2 {
+    height: 40px;
+    line-height: 40px;
+    color: #333;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.upgrade-popup .upgrade-box-date {
+    height: 32px;
+    line-height: 32px;
+}
+
+.upgrade-popup .upgrade-box-date p {
+    font-size: 15px;
+    float: left;
+}
+
+.upgrade-popup .upgrade-box-date span {
+    color: #20a53a;
+    font-size: 14px;
+}
+
+.upgrade-popup .upgrade-box-date p:last-child {
+    float: right;
+}
+
+
+.upgrade-popup .upgrade-box-desc {
+    background: #f6fbf7;
+    padding: 15px;
+    height: 160px;
+    margin-top: 20px;
+    overflow-y: scroll;
+}
+
+.upgrade-popup .upgrade-box-desc p {
+    margin-bottom: 8px;
+}
+
+.upgrade-popup .upgrade-box-btn {
+    width: 70%;
+    margin: 35px auto 0;
+
+}
+
+.upgrade-popup .upgrade-box-btn button {
+    width: 122px;
+}
+
+.upgrade-popup .upgrade-box-btn button:last-child {
+    background: #20a53a;
+    float: right;
+}
+
+/* 遮罩层样式 */
+.upgrade-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色 */
+    z-index: 9998;
+}
+
+/*选择图片页面end*/
+
+
+/** 暗黑模式下部分样式： 2024-04-24*/
+.pear-admin-dark .layui-table {
+    background-color: var(--lay-color-bg-2) !important;
+}
+
+.pear-admin-dark .layui-table tr:hover {
+    background-color: #3e3e3f !important;
+}
+
+.pear-admin-dark .layui-footer {
+    color: #ffffff !important;
+}
+
+.pear-admin-dark .layui-form .bottom {
+    box-shadow: -1px 0 4px rgb(0 0 0 / 12%);
+    background-color: var(--lay-color-bg-2);
+    border-top: 1px solid #141414;
+}
+
+.pear-admin-dark .layui-btn.layui-btn-primary {
+    background-color: #f0f8ffb8 !important;
+}
+
+.pear-admin-dark xm-select {
+    background-color: var(--lay-color-fill-2);
+    color: #ffffff;
+    border: 1px solid var(--lay-color-border-2);
+}
+
+.pear-admin-dark xm-select > .xm-body {
+    background-color: var(--lay-color-bg-5);
+}
+
+.pear-admin-dark .layui-input {
+    border-color: var(--lay-color-border-1) !important;
+}
+
+.pear-admin-dark .layui-iconpicker-search {
+    background-color: var(--lay-color-bg-2);
+}
+
+.pear-admin-dark .layui-iconpicker-icon {
+    background-color: var(--lay-color-bg-5);
+    border-right: 1px solid var(--lay-color-bg-3);
+}
+
+.pear-admin-dark .layui-iconpicker-item {
+    border-color: var(--lay-color-border-3) !important;
+}
+
+.pear-admin-dark .layui-iconpicker .layui-iconpicker-icon-item {
+    border-color: var(--lay-color-border-3) !important;
+}
+.pear-admin-dark .layui-iconpicker .layui-iconpicker-icon-item:hover{
+    background-color: var(--lay-color-fill-4);
+}
+
+.pear-admin-dark .layui-iconpicker .layui-anim {
+    background-color: var(--lay-color-fill-2);
+}
+
+.pear-admin-dark .layui-iconpicker .layui-iconpicker-list {
+    background-color: #272626 !important;
+}
+
+/** 暗黑模式下部分样式：end*/
+
+/*多图选择 end*/
+
+@media screen and (max-width: 590px) and (min-width: 100px) {
+
+    .main-container {
+        margin: 5px;
+    }
+
+    .layui-form-item .layui-input-block {
+        display: block
+    }
+
+    .layui-form-item .layui-input-block button {
+        position: inherit;
+        top: 10px;
+    }
+
+    .layui-form-item .layui-input-block .layui-btn {
+        position: inherit;
+        top: 10px;
+    }
+
+    .main-container .layui-form-item .layui-form-label {
+        float: none;
+        width: 100%;
+        text-align: left;
+        background-color: transparent;
+        border: 0;
+        padding-left: 1rem;
+    }
+
+    .main-container .layui-form-item .layui-input-block {
+        margin-left: 0 !important;
+    }
+
+    .layui-form .layui-form-item .required:after {
+        position: absolute;
+        left: 0 !important;
+    }
+
+    .layui-form .layui-form-item > tip {
+        margin-left: 0 !important;
+    }
+
+    .layui-input-block-flex {
+        display: block;
+    }
+
+    .layui-input-block-flex input {
+        margin-bottom: 10px;
+    !important;
+    }
+}

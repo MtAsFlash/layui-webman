@@ -1,0 +1,234 @@
+<div class="main-container">
+    <form class="layui-form" action="" method="post" id="admin-edit-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">{:trans('Role_group',[],'admin')}</label>
+            <div class="layui-input-block">
+                <div name="roles" id="roles" value=""></div>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">{:trans('Username',[],'admin')}</label>
+            <div class="layui-input-block">
+                <input type="text" name="username" required lay-verify="required" autocomplete="off"
+                       placeholder="{:trans('Please enter', ['%s%' => trans('Username',[],'admin')])}"
+                       class="layui-input" value="">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">{:trans('Nickname',[],'admin')}</label>
+            <div class="layui-input-block">
+                <input type="text" name="nickname" required lay-verify="required" autocomplete="off"
+                       placeholder="{:trans('Please enter', ['%s%' => trans('Nickname',[],'admin')])}"
+                       class="layui-input" value="">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">{:trans('Password',[],'admin')}</label>
+            <div class="layui-input-block">
+                <input type="password" name="password" autocomplete="off" lay-verify="pwd"
+                       placeholder="{:trans('Do not update password, please leave blank',[],'admin')}"
+                       class="layui-input" value="">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">{:trans('Email',[],'admin')}</label>
+            <div class="layui-input-block">
+                <input type="email" name="email" autocomplete="off" lay-verify="email"
+                       placeholder="{:trans('Please enter', ['%s%' => trans('Email',[],'admin')])}" class="layui-input"
+                       value="">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">{:trans('Mobile',[],'admin')}</label>
+            <div class="layui-input-block">
+                <input type="text" name="mobile" autocomplete="off" lay-verify="phone"
+                       placeholder="{:trans('Please enter', ['%s%' => trans('Mobile',[],'admin')])}" class="layui-input"
+                       value="">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">{:trans('Status')}</label>
+            <div class="layui-input-block">
+                <input type="checkbox" id="admin-status" lay-filter="admin-status" lay-skin="switch"/>
+                <input type="text" style="display:none" name="status" value="0"/>
+            </div>
+        </div>
+        <input type="hidden" id="id" name="id" value="">
+        {if(get_config('onetime_password'))}
+        <div class="layui-form-item">
+            <label class="layui-form-label">{:trans('onetime password')}</label>
+            <div class="layui-input-block">
+                <a class="layui-btn layui-btn-sm layui-btn-primary"
+                   id="set_onetime_passwrod">设置动态口令
+                </a>
+            </div>
+        </div>
+        {/if}
+
+        <div class="bottom">
+            <div class="button-container">
+                <button type="submit" class="layui-btn layui-btn-sm" lay-submit=""
+                        lay-filter="data-save">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    {:trans('Save')}
+                </button>
+                <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    {:trans('Reset')}
+                </button>
+            </div>
+        </div>
+    </form>
+
+    {if(get_config('onetime_password'))}
+    <div class="onetime-password-container" id="set-onetime-password-container"
+         style="max-width:450px;float:left;margin-left:150px;margin-top:0;display: none;">
+        <div class="onetime_title">
+            截图给对应身份用户扫码绑定（使用身份验证器APP扫码）
+        </div>
+        <div class="onetime_ewm">
+            <img id="onetime_ewm_img" src=""/>
+        </div>
+        <div class="onetime_one">
+            <ul>
+                <li>开启服务后，请立即使用“Google身份验证器”等APP绑定，以免出现无法登录的情况。</li>
+                <li>同一个IP验证成功后24小时内无需再次验证。</li>
+                <li>各大软件商店均可下载身份验证器APP，支持安卓、IOS系统。</li>
+            </ul>
+        </div>
+    </div>
+    {/if}
+
+</div>
+
+
+<script>
+  layui.use(["form", "iconPicker", "util"], function () {
+    let PRIMARY_KEY = "id";
+    let PRIMARY_KEY_VALUE = "{:request()->get('id')}";
+
+    var $ = layui.$;
+    var form = layui.form;
+    form.render();
+
+    $('#set_onetime_passwrod').click(function () {
+      layer.open({
+        type: 1,
+        title: '设置动态口令认证',
+        shadeClose: false,
+        closeBtn: 2,
+        shade: 0.6,
+        zIndex: 9947400836408,
+        area: ['550px', '430px'],
+        content: $('#set-onetime-password-container').show(),
+        success: function () {
+          let adminId = $('#id').val();
+          $.post("/app/admin/config/get", {param: 'onetime_password','admin_id':adminId}, function (res) {
+            if (res.code !== 200) {
+              return hui_toast('error', res.msg);
+            }
+            $('#onetime_ewm_img').attr('src', 'data:image/png;base64, ' + res.data.qrcode_img);
+          })
+        },
+        cancel: function () {
+
+        }
+      });
+    })
+    //自定义密码表单验证
+    form.verify({
+      pwd: function (value, elem) {
+        if (value.length > 0) {
+          if (!/^[^\u4e00-\u9fa5]*$/.test(value)) {
+            return "{:trans('Password cannot appear in Chinese',[],'admin')}";
+          }
+          if (!/^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{6,15}$/.test(value)) {
+            return "{:trans('Composed of letters, numbers, special characters, any two types, 6-15 digits',[],'admin')}";
+          }
+        }
+      }
+    });
+
+    $.ajax({
+      url: "/app/admin/admin/select?" + PRIMARY_KEY + "=" + PRIMARY_KEY_VALUE,
+      dataType: "json",
+      success: function (res) {
+        // 给表单初始化数据
+        layui.each(res.data[0], function (key, value) {
+          var $targetForm = $('#admin-edit-form');
+          let obj = $targetForm.find('*[name="' + key + '"]');
+          if (typeof obj[0] === "undefined" || !obj[0].nodeName) return;
+          if (obj[0].nodeName.toLowerCase() === "textarea") {
+            obj.val(layui.util.escape(value));
+          } else {
+            obj.attr("value", value);
+          }
+        });
+
+        // 字段 角色 roles
+        layui.use(["xmSelect"], function () {
+          layui.$.ajax({
+            url: "/app/admin/role/select?format=tree",
+            dataType: "json",
+            success: function (res) {
+              let value = layui.$("#roles").attr("value");
+              let initValue = value ? value.split(",") : [];
+              if (!top.Admin.Account.isSupperAdmin) {
+                layui.each(res.data, function (k, v) {
+                  v.disabled = true;
+                });
+              }
+              layui.xmSelect.render({
+                el: "#roles",
+                name: "roles",
+                initValue: initValue,
+                data: res.data,
+                layVerify: "required",
+                theme: {color: 'var(--global-primary-color)'},
+                tree: {show: true, expandedKeys: true, strict: false},
+                toolbar: {show: true, list: ["ALL", "CLEAR", "REVERSE"]},
+              })
+              if (res.code !== 200) {
+                return hui_toast('error', res.msg);
+              }
+            }
+          });
+        });
+
+        // 字段 状态 status
+        layui.use(["form"], function () {
+          layui.$("#admin-status").attr("checked", layui.$('input[name="status"]').val() != 0);
+          layui.form.render();
+          layui.form.on("switch(admin-status)", function (data) {
+            layui.$('input[name="status"]').val(this.checked ? 1 : 0);
+          });
+        })
+
+        //表单提交
+        layui.form.on("submit(data-save)", function (data) {
+          data.field[PRIMARY_KEY] = PRIMARY_KEY_VALUE;
+          layui.$.ajax({
+            url: '/app/admin/admin/edit',
+            type: "POST",
+            dateType: "json",
+            data: data.field,
+            success: function (res) {
+              if (res.code !== 200) {
+                return hui_toast('error', res.msg);
+              }
+              return hui_toast('success', "{:trans('Operation successful')}", function () {
+                //刷新数据表格
+                if (parent.hasOwnProperty('refreshTable')) {
+                  refreshTable('adminTable', 1);
+                  layer.closeAll('page');
+                }
+              })
+            }
+          });
+          return false;
+        });
+
+      }
+    });
+  })
+</script>

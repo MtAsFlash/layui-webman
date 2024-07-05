@@ -1,0 +1,146 @@
+<div class="main-container">
+    <form class="layui-form" action="" method="post" id="dict-edit-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">字典名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" required lay-verify="required|alpha" autocomplete="off"
+                       placeholder="请输入英文字母组合" class="layui-input" disabled readonly>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">字典值</label>
+            <div class="layui-input-block">
+                <table class="layui-table" id="dict-form-table-edit">
+                    <thead>
+                    <tr>
+                        <th>标题-name</th>
+                        <th width="30%">值-value</th>
+                        <th width="65">操作</th>
+
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td colspan="2">请输入对应的标题和值</td>
+                        <td style="text-align: center">
+                            <div class="layui-btn-group">
+                                <button type="button" class="layui-btn layui-btn-sm dict-btn-add">新增</button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+
+        <div class="bottom">
+            <div class="button-container">
+                <button type="submit" class="layui-btn layui-btn-sm" lay-submit=""
+                        lay-filter="data-save">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+
+    </form>
+</div>
+<script>
+  let PRIMARY_KEY = "name";
+  let PRIMARY_KEY_VALUE = "{:request()->get('name')}";
+  layui.use(["form"], function () {
+    var $ = layui.$;
+    var form = layui.form;
+    form.render();
+
+    form.verify({
+      alpha: function (value, elem) {
+        if (!/^[A-Za-z0-9_-]+$/.test(value)) {
+          return '只能是字母数字下划线_及破折号-';
+        }
+      }
+    });
+    window.tr_index = 0;
+
+    layui.$.ajax({
+      url: "/app/admin/dict/get?name=" + PRIMARY_KEY_VALUE,
+      dataType: "json",
+      async: false,
+      success: function (res) {
+        if (res.code !== 200) {
+          return hui_toast('error', res.msg);
+        }
+        let data = res.data;
+        var $targetForm = $('#dict-edit-form');
+        let obj = $targetForm.find('*[name="name"]');
+        obj.val(data.name);
+
+        var str = '';
+        tr_index = data.value.length;
+        layui.each(data.value, function (index, item) {
+          str += '<tr>';
+          str += '<td><input type="text" name="value[' + index + '][name]" lay-verify="required" placeholder="标题" autocomplete="off" class="layui-input" value="' + item.name + '"></td>';
+          str += '<td><input type="text" name="value[' + index + '][value]" lay-verify="required" placeholder="值" autocomplete="off" class="layui-input" value="' + item.value + '"></td>';
+          str += '<td style="text-align: center">';
+          str += '<button type="button" class="layui-btn layui-btn-danger layui-btn-xs dist-form-edit-table-del">删除</button>';
+          str += '</td>';
+          str += '</tr>';
+        });
+        layui.$('#dict-form-table-edit').find('tbody tr').after(str);
+      }
+    });
+    layui.$('.dist-form-edit-table-del').on('click', function () {
+      $(this).parents('tr').remove()
+    });
+
+    let v_index = tr_index;
+    $('.dict-btn-add').on('click', function () {
+      _fieldId = v_index++;
+      var element = $([
+        '<tr>',
+        '<td><input type="text" name="value[' + _fieldId + '][value]" lay-verify="required" placeholder="值" autocomplete="off" class="layui-input" value=""></td>',
+        '<td><input type="text" name="value[' + _fieldId + '][name]" lay-verify="required" placeholder="标题" autocomplete="off" class="layui-input" value=""></td>',
+        '<td style="text-align: center">',
+        '<button type="button" class="layui-btn layui-btn-danger layui-btn-xs dist-form-edit-table-del">删除</button>',
+        '</td>',
+        '</tr>',
+      ].join(''));
+      element.find('.dist-form-edit-table-del').on('click', function () {
+        $(this).parents('tr').remove();
+      })
+      $('#dict-form-table-edit tbody').append(element);
+    });
+
+    //表单提交
+    layui.form.on("submit(data-save)", function (data) {
+      data.field[PRIMARY_KEY] = PRIMARY_KEY_VALUE;
+      layui.$.ajax({
+        url: '/app/admin/dict/edit',
+        type: "POST",
+        dateType: "json",
+        data: data.field,
+        success: function (res) {
+          if (res.code !== 200) {
+            return hui_toast('error', res.msg);
+          }
+          return hui_toast('success', "操作成功", function () {
+            //刷新数据表格
+            if (parent.hasOwnProperty('refreshTable')) {
+              refreshTable('dictTable', 1);
+              layer.closeAll('page');
+            }
+          });
+        }
+      });
+      return false;
+    });
+
+  });
+</script>

@@ -1,0 +1,184 @@
+<div class="layui-card">
+    <div class="layui-card-body">
+        <div class="layui-row top-search-from">
+            <form class="layui-form layui-col-md12 layui-form-dict">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <input type="text" name="name" placeholder="请输入名称" autocomplete="off"
+                               class="layui-input">
+                    </div>
+                    <div class="layui-inline">
+                        <button class="layui-btn layui-btn-md" data-type="reload" lay-submit=""
+                                lay-filter="table-search-dict">
+                            <i class="layui-icon layui-icon-search"></i>搜索
+                        </button>
+                        <button class="layui-btn layui-btn-danger layui-btn-md" type="reset"
+                                lay-submit="" lay-filter="table-reset-dict">
+                            <i class="layui-icon">&#xe63f;</i>清空
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div style="">
+    <div class="layui-card">
+        <div class="layui-card-body">
+            <table class="layui-hide" id="dictTable" lay-filter="dictTable"></table>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="dictTableToolbar">
+    <button class="layui-btn layui-btn-sm" permission="app.admin.dict.add"
+            data-open="/app/admin/dict/add" data-title="添加字典">
+        <i class="layui-icon layui-icon-add-1"></i>
+        新增
+    </button>
+    <button class="layui-btn layui-btn-danger layui-btn-sm" permission="app.admin.dict.delete" lay-event="getChecked">
+        <i class="layui-icon layui-icon-delete"></i>删除
+    </button>
+</script>
+
+<script type="text/html" id="dictValueTpl">
+    <button class="layui-btn layui-btn-xs layui-bg-purple" lay-event="dictValueTplInfo">点击查看</button>
+</script>
+<script type="text/html" id="dictBarTool">
+    <button class="layui-btn layui-btn-xs" title="编辑" permission="app.admin.dict.edit"
+            data-open="/app/admin/dict/edit?name={{d.name}}"
+            data-title="编辑">编辑
+    </button>
+    {{# if(d.id!==1){ }}
+    <button class="layui-btn layui-btn-danger layui-btn-xs" title="删除" permission="app.admin.dict.delete"
+            data-confirm="/app/admin/dict/delete" data-data="id={{d.id}}"
+            data-title="您确定要删除吗？" data-reload="1" data-table-id="dictTable">
+        删除
+    </button>
+    {{# } }}
+</script>
+
+<script>
+  layui.use(['table', 'form', 'common', 'code'], function () {
+    var $ = layui.jquery;
+    var form = layui.form;
+    var table = layui.table;
+    var common = layui.common;
+    var code = layui.code;
+    form.render();
+
+    var tableInit = table.render({
+      elem: '#dictTable'
+      , toolbar: '#dictTableToolbar'
+      , defaultToolbar: [{
+        layEvent: 'refresh',
+        icon: 'layui-icon-refresh',
+        title: '刷新'
+      }, 'filter', 'exports']
+      , method: 'get'
+      , url: "/app/admin/dict/select"
+      , parseData: function (res) {
+        return {
+          "code": 0,
+          "msg": res.msg,
+          "count": res.count,
+          "data": res.data
+        };
+      }
+      , cellMinWidth: 100
+      , cols: [[
+        {type: 'checkbox', fixed: 'left'},
+        {field: 'id', title: 'ID', width: 60, align: 'center'},
+        {field: 'name', title: '名称', align: 'center'},
+        {field: 'value', title: '值', templet: '#dictValueTpl', align: 'center'},
+        {fixed: 'right', title: '操作', toolbar: '#dictBarTool', align: 'center', width: 170}
+      ]]
+      , page: true
+      , limit: 10
+    });
+
+    // 表头工具栏工具事件
+    table.on("toolbar(" + tableInit.config.id + ")", function (obj) {
+      var config = obj.config;
+      var tableId = config.id;
+      var status = table.checkStatus(tableId);
+      if (obj.event === "refresh") {
+        refreshTable(tableInit.config.id, 1);
+      } else if (obj.event === "getChecked") {
+        if (!status.data.length) return layer.msg('无选中数据');
+        let checkIds = common.checkField(obj, "id");
+        doRemove(checkIds.split(","));
+      }
+    })
+    //表格按钮：
+    table.on("tool(" + tableInit.config.id + ")", function (obj) {
+      var name = obj.data.name;
+      var value = JSON.stringify(JSON.parse(obj.data.value), null, 4)
+      if (obj.event === "dictValueTplInfo") {
+        //查看值
+        layer.open({
+          type: 1,
+          title: "查看值-【" + name + "】",
+          shade: 0.3,
+          shadeClose: true,
+          area: ["500px"],
+          content: '<pre class="layui-code dict-value-code-json" lay-options="{}">' + value + '</pre>'
+        });
+        layui.code({
+          elem: '.dict-value-code-json',
+          preview: false,
+          ln: false,
+          theme: 'dark'
+        });
+
+      }
+    });
+
+    // 执行删除
+    let doRemove = function (ids) {
+      let data = {};
+      data["id"] = ids;
+      layer.confirm("确定删除?", {
+        icon: 3,
+        title: "提示"
+      }, function (index) {
+        layer.close(index);
+        let loading = layer.load();
+        $.ajax({
+          url: "/app/admin/dict/delete",
+          data: data,
+          dataType: "json",
+          type: "post",
+          success: function (res) {
+            layer.close(loading);
+            if (res.code !== 200) {
+              return hui_toast('error', res.msg);
+            }
+            return hui_toast('success', "操作成功", function () {
+              refreshTable(tableInit.config.id, 1)
+            });
+          }
+        })
+      });
+    }
+
+    // 表格顶部搜索事件
+    form.on("submit(table-search-dict)", function (data) {
+      table.reload(tableInit.config.id, {
+        where: data.field
+      })
+      return false;
+    });
+    //表格顶部清空时间
+    form.on("submit(table-reset-dict)", function (data) {
+      $(".layui-form-dict")[0].reset();
+      form.render();
+      table.reload(tableInit.config.id, {
+        where: {}
+      })
+      return false;
+    })
+
+  });
+</script>

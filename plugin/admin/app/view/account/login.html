@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>登录</title>
+    <link rel="stylesheet" href="__LIB__/pear/css/pear.css"/>
+    <link rel="stylesheet" href="__STATIC_ADMIN__/css/other/login.css"/>
+    <link rel="stylesheet" href="__STATIC_ADMIN__/css/variables.css"/>
+</head>
+<body>
+<div class="login-page">
+    <div class="layui-row">
+        <div class="layui-col-sm6 login-bg layui-show-sm-block" style="display: none">
+            <img class="login-bg-img" src="__STATIC_ADMIN__/images/banner.png" alt=""/>
+        </div>
+        <div class="layui-col-sm6 login-form">
+            <div class="layui-form">
+                <div class="form-center">
+                    <div class="form-center-box">
+                        <div class="top-log-title">
+                            <img class="top-log" src="__STATIC_ADMIN__/images/logo.685dda16.jpg" alt=""/>
+                            <span>Huicmf 2.0</span>
+                        </div>
+                        <div class="top-desc">
+                            基于webman开发的后台管理系统
+                        </div>
+                        <form class="layui-form" action="javascript:void(0);">
+                            <div style="margin-top: 30px;">
+                                <div class="layui-form-item">
+                                    <div class="layui-input-wrap">
+                                        <div class="layui-input-prefix">
+                                            <i class="layui-icon layui-icon-username"></i>
+                                        </div>
+                                        <input type="text" lay-verify="required" name="username" placeholder="账户"
+                                               autocomplete="off"
+                                               class="layui-input">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <div class="layui-input-wrap">
+                                        <div class="layui-input-prefix">
+                                            <i class="layui-icon layui-icon-password"></i>
+                                        </div>
+                                        <input type="password" name="password" value=""
+                                               lay-verify="required" placeholder="密码" autocomplete="off"
+                                               class="layui-input" lay-affix="eye">
+                                    </div>
+                                </div>
+                                <div class="tab-log-verification">
+                                    <div class="verification-text">
+                                        <div class="layui-input-wrap">
+                                            <div class="layui-input-prefix">
+                                                <i class="layui-icon layui-icon-auz"></i>
+                                            </div>
+                                            <input type="text" hover lay-verify="required" id="captcha" name="captcha"
+                                                   placeholder="验证码"
+                                                   autocomplete="off"
+                                                   class="layui-input">
+                                        </div>
+                                    </div>
+                                    <img class="codeImage" width="120px" src=""/>
+                                </div>
+                                <div class="login-btn" style="margin-top:15px;">
+                                    <button type="submit" lay-submit="" lay-filter="login" class="layui-btn login">登 录
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{if($onetime_password)}
+<div class="onetime_password_box">
+    <form class="layui-form" action="" method="post">
+        <input type="hidden" name="safe_mode" value="1">
+        <div class="layui-form-item">
+            <input type="text" name="vcode" required lay-verify="required" autocomplete="off"
+                   placeholder="{:trans('Please enter', ['%s%' => trans('onetime password')])}" class="layui-input"
+                   value="" lay-reqtext="{:trans('onetime password cannot be empty')}">
+        </div>
+        <div class="bottom">
+            <div class="button-container">
+                <button type="submit" class="layui-btn layui-btn-sm" lay-submit=""
+                        lay-filter="verifyAndLogin" style="width:100%;height:40px; line-height:40px;">
+                    {:trans('Verify and Login')}
+                </button>
+            </div>
+        </div>
+        <p style="margin:15px auto; color:#666;">请使用谷歌（或其他）认证器获取验证代码</p>
+    </form>
+</div>
+{/if}
+
+<!-- 资 源 引 入 -->
+<script src="__LIB__/layui/layui.js"></script>
+<script src="__LIB__/pear/pear.js"></script>
+<script src="__STATIC_ADMIN__/js/hui-admin.js"></script>
+<script>
+  layui.use(['form', 'button'], function () {
+    var $ = layui.$;
+    var form = layui.form;
+    var button = layui.button;
+
+    switchCaptcha();
+
+    function switchCaptcha() {
+      $('.codeImage').attr("src", "/app/admin/account/captcha?v=" + new Date().getTime());
+    }
+
+    $('.codeImage').on('click', function () {
+      switchCaptcha();
+    });
+
+    form.on('submit(verifyAndLogin)', function (data) {
+      let username = $("input[name='username']").val();
+      let password = $("input[name='password']").val();
+      let safe_mode = $("input[name='safe_mode']").val();
+      let vcode = $("input[name='vcode']").val();
+      $.ajax({
+        url: '/app/admin/account/login',
+        type: "POST",
+        data: {username: username, password: password, vcode: vcode, safe_mode: safe_mode},
+        success: function (res) {
+          if (res.code === 200) {
+            return hui_toast('success', '登录成功', function () {
+              location.reload();
+            });
+          } else {
+            //switchCaptcha();
+            //$('#captcha').val('');
+            return hui_toast('error', res.msg);
+          }
+        }
+      });
+      return false;
+    })
+
+    // 登 录 提 交
+    form.on('submit(login)', function (data) {
+      button.load({
+        elem: '.login',
+        time: 500,
+        done: function () {
+          $.ajax({
+            url: '/app/admin/account/login',
+            type: "POST",
+            data: data.field,
+            success: function (res) {
+              if (res.code === 200) {
+                return hui_toast('success', '登录成功', function () {
+                  location.reload();
+                });
+              } else if (res.code === 101) {
+                layer.open({
+                  type: 1,
+                  title: '设置动态口令认证',
+                  shadeClose: false,
+                  closeBtn: 2,
+                  shade: 0.6,
+                  zIndex: 9947400836407,
+                  area: ['400px', '270px'],
+                  content: $('.onetime_password_box'),
+                  cancel: function () {
+                    switchCaptcha();
+                    $('#captcha').val('');
+                  }
+                });
+              } else {
+                switchCaptcha();
+                $('#captcha').val('');
+                return hui_toast('error', res.msg);
+              }
+            }
+          });
+        }
+      })
+      return false;
+    });
+  })
+</script>
+</body>
+</html>

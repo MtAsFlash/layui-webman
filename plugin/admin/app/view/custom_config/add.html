@@ -1,0 +1,251 @@
+<div class="main-container">
+    <form class="layui-form" action="javascript:;" method="post" onsubmit="return dosub(this)">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">配置名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="name" required lay-verify="required|name" autocomplete="off"
+                       placeholder="必须是英文开头，允许带数字下划线" class="layui-input" value="">
+                <tip>名称必须是英文开头，允许带数字下划线，长度1-20位</tip>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">简洁说明</label>
+            <div class="layui-input-block">
+                <input type="text" name="title" required lay-verify="required" autocomplete="off" class="layui-input"
+                       placeholder="例如：这个是站点QQ">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">配置类型</label>
+            <div class="layui-input-inline">
+                <select name="fieldtype" lay-filter="configFieldType" style="width:230px">
+                    {foreach name='field_type' id='vo' key='k'}
+                    <option value="{$k}">{$vo}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item" style="z-index:0">
+            <label class="layui-form-label">配置值</label>
+            <div class="layui-input-block custom-config-mode config_mode_text">
+                <input type="text" name="value[text]" autocomplete="off" placeholder="" value=""
+                       class="layui-input">
+            </div>
+
+            <div class="layui-input-block custom-config-mode config_mode_textarea" style="display:none">
+                <textarea class="layui-textarea" name="value[textarea]"
+                          placeholder="例如：214243830"></textarea>
+            </div>
+            <div class="layui-input-block custom-config-mode config_mode_image huicmf-upload"
+                 style="display:none">
+                <div class="layui-input-block-flex">
+                    <input type="text" name="value[image]" id="custom-config-image-select-input" autocomplete="off"
+                           class="layui-input" onmouseover="hui_img_preview('upload_pic_custom_config',this.value)"
+                           onmouseleave="layer.tips();">
+                    <button type="button" class="layui-btn layui-btn-normal layUpload"
+                            data-multiple="false" data-input-id="custom-config-image-select-input"
+                            id="upload_pic_custom_config"
+                            data-preview-id="custom-config-image" data-type="image"><i class="layui-icon"></i>上传图片
+                    </button>
+                    <button type="button" class="layui-btn" style="margin-left:10px;"
+                            data-open-pic="/app/admin/upload/choose?type=one&select_id=custom-config-image-select-input">
+                        <i class="layui-icon"></i>选择图片
+                    </button>
+                </div>
+                <div>
+                    <div id="custom-config-image-select-input_box" class="upload_pic_box"></div>
+                </div>
+            </div>
+            <div class="layui-input-block custom-config-mode config_mode_images" style="display: none">
+                <a class="layui-btn"
+                   data-open-pic="/app/admin/upload/choose?type=more&select_id=custom-config-image-select-input-more">
+                    <i class="layui-icon">&#xe67c;</i>选择图片
+                </a>
+                <tip>(可拖拽图片调整显示顺序 )</tip>
+                <!--回调显示选择的图片-->
+                <div class="uploader-list am-cf" id="custom-config-image-select-input-more" data-name="value[images][]">
+
+                </div>
+            </div>
+
+            <div class="layui-input-block custom-config-mode config_mode_radio" style="display:none">
+
+            </div>
+            <div class="layui-input-block custom-config-mode config_mode_select" style="display:none">
+
+            </div>
+            <div class="layui-input-block custom-config-mode config_mode_date" style="display:none">
+                <input type="text" id="custom-config-input-date" name="value[date]" autocomplete="off" value=""
+                       class="layui-input" placeholder="yyyy-MM-dd">
+            </div>
+
+            <div class="layui-input-block custom-config-mode config_mode_datetime" style="display:none">
+                <input type="text" id="custom-config-input-datetime" name="value[datetime]" autocomplete="off" value=""
+                       class="layui-input" placeholder="yyyy-MM-dd HH:mm:ss">
+            </div>
+
+            <div class="layui-input-block custom-config-mode config_mode_editor" style="display:none;">
+                <div style="border: 1px solid #ccc; flex: 1;">
+                    <div id="editor-toolbar" style="border-bottom: 1px solid #ccc;"></div>
+                    <div id="editor-text-area" style="height: 400px"></div>
+                </div>
+                <textarea id="custom-config-editor-content-textarea" name="value[editor]"
+                          style="display: none"></textarea>
+            </div>
+
+        </div>
+
+        <div class="bottom">
+            <div class="button-container">
+                <button type="submit" class="layui-btn layui-btn-sm" lay-submit=""
+                        lay-filter="data-save-customconfig">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+
+    </form>
+
+    <table class="layui-table" id="custom-config-form-table-create" style="display: none">
+        <thead>
+        <tr>
+            <th>标题-name</th>
+            <th width="30%">值-value</th>
+            <th width="65">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td colspan="2">请输入对应的标题和值</td>
+            <td style="text-align: center">
+                <div class="layui-btn-group">
+                    <button type="button" class="layui-btn layui-btn-sm custom-config-btn-add">新增</button>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<link href="__LIB__/wangEditor/style.css" rel="stylesheet">
+<script src="__LIB__/wangEditor/index.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/prettier/3.0.3/standalone.min.js"></script>
+<script>
+  let E = window.wangEditor; // 编辑器全局变量
+  let editor = E.createEditor({
+    selector: '#editor-text-area',
+    html: '<p><br></p>',
+    config: {
+      placeholder: 'Type here...',
+      MENU_CONF: {
+        uploadImage: {
+          server: '/app/admin/upload/upload?editor_type=wang',
+          fieldName: 'custom-field-name',
+          //base64LimitSize: 10 * 1024 * 1024 // 10M 以下插入 base64
+        }
+      }, onChange(editor) {
+        html = editor.getHtml()
+        document.getElementById('custom-config-editor-content-textarea').value = html
+      }
+    }
+  })
+
+  let toolbar = E.createToolbar({
+    editor,
+    selector: '#editor-toolbar',
+    config: {}
+  })
+
+</script>
+<script>
+  layui.use(["form", "laydate", "upload_hui", "ddSort"], function () {
+    var $ = layui.$;
+    var form = layui.form;
+    var laydate = layui.laydate;
+    var upload_hui = layui.upload_hui;
+    upload_hui.render();
+    form.render();
+
+    //多图图片列表拖动，需要引入ddSort
+    $('.uploader-list').DDSort({
+      target: '.file-item',
+      delay: 100, // 延时处理，默认为 50 ms，防止手抖点击 A 链接无效
+      floatStyle: {
+        'border': '1px solid #ccc',
+        'background-color': '#fff'
+      }
+    });
+
+
+    laydate.render({
+      elem: '#custom-config-input-date'
+      , type: 'date'
+    });
+
+    laydate.render({
+      elem: '#custom-config-input-datetime'
+      , type: 'datetime'
+    });
+
+    form.on('select(configFieldType)', function (data) {
+      $('.custom-config-mode').hide();
+      if (data.value === 'radio' || data.value === 'select') {
+        $('#custom-config-form-table-create').css('display', 'inline-table');
+        $('.config_mode_' + data.value).append($('#custom-config-form-table-create'));
+      }
+      $('.config_mode_' + data.value).show();
+    });
+
+    var conf_index = 0;
+    $('.custom-config-btn-add').on('click', function () {
+      var _fieldId = conf_index++;
+      var element = $([
+        '<tr>',
+        '<td><input type="text" name="value[more][' + _fieldId + '][name]" required lay-verify="required" placeholder="标题" autocomplete="off" class="layui-input" value=""></td>',
+        '<td><input type="text" name="value[more][' + _fieldId + '][value]" required lay-verify="required" placeholder="值" autocomplete="off" class="layui-input" value=""></td>',
+        '<td style="text-align: center">',
+        '<button type="button" class="layui-btn layui-btn-danger layui-btn-xs custom-config-form-add-table-del">删除</button>',
+        '</td>',
+        '</tr>',
+      ].join(''));
+      element.find('.custom-config-form-add-table-del').on('click', function () {
+        $(this).parents('tr').remove();
+      })
+      $('#custom-config-form-table-create tbody').append(element);
+    });
+
+    window.dosub = function (obj) {
+      var reg = /^[a-zA-Z]{1}([a-zA-Z0-9]|[_]){0,19}$/;
+      if ($("input[name='name']").val() == '' || !reg.test($("input[name='name']").val())) {
+        return hui_toast('error', "配置名称必须为英文拼音数字_");
+      }
+      if ($("input[name='title']").val() === '') {
+        return hui_toast('error', "简洁说明不能为空");
+      }
+      layui.$.ajax({
+        url: '/app/admin/customconfig/add',
+        type: "POST",
+        dateType: "json",
+        data: $(obj).serialize(),
+        success: function (res) {
+          if (res.code !== 200) {
+            return hui_toast('error', res.msg);
+          }
+          return hui_toast('success', "操作成功", function () {
+            //刷新数据表格
+            if (parent.hasOwnProperty('refreshTable')) {
+              refreshTable('customConfigTable', 1);
+              layer.closeAll('page');
+            }
+          })
+        }
+      })
+      return false;
+    }
+  });
+</script>

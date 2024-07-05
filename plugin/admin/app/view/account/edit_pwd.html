@@ -1,0 +1,81 @@
+<div class="main-container">
+    <form class="layui-form" action="" method="post" id="edit-pwd-form">
+        <div class="layui-form-item">
+            <label class="layui-form-label required">原密码</label>
+            <div class="layui-input-block">
+                <input type="password" name="oldpwd" autocomplete="off" required lay-verify="required"
+                       placeholder="请输入原密码" class="layui-input" value="">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label required">新密码</label>
+            <div class="layui-input-block">
+                <input type="password" id="newpwd" name="newpwd" lay-verify="required|pwd" autocomplete="off"
+                       placeholder="请输入新密码" class="layui-input">
+                <tip>由字母、数字、特殊字符，任意2种组成，6-15位</tip>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label required">确定密码</label>
+            <div class="layui-input-block">
+                <input type="password" id="confirm" lay-verify="required|confirmPass" autocomplete="off"
+                       placeholder="请再次输入密码" class="layui-input">
+                <tip>由字母、数字、特殊字符，任意2种组成，6-15位</tip>
+            </div>
+        </div>
+
+        <div class="bottom">
+            <div class="button-container">
+                <button type="submit" class="layui-btn layui-btn-sm" lay-submit=""
+                        lay-filter="data-save">
+                    <i class="layui-icon layui-icon-ok"></i>
+                    提交
+                </button>
+                <button type="reset" class="layui-btn layui-btn-primary layui-btn-sm">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+  layui.use(['form', 'jquery'], function () {
+    let form = layui.form;
+    let $ = layui.jquery;
+    form.verify({
+      pwd: function (value, elem) {
+        if (!/^[^\u4e00-\u9fa5]*$/.test(value)) {
+          return "密码不能出现中文";
+        }
+        if (!/^(?![a-zA-Z]+$)(?!\d+$)(?![^\da-zA-Z\s]+$).{6,15}$/.test(value)) {
+          return '由字母、数字、特殊字符，任意2种组成，6-15位';
+        }
+      },
+      confirmPass: function (value) {
+        if ($('input[name=newpwd]').val() !== value)
+          return '两次密码输入不一致！';
+      }
+    });
+
+    form.on('submit(data-save)', function (data) {
+      $.ajax({
+        url: "/app/admin/account/editPwd",
+        type: "POST",
+        dateType: "json",
+        data: data.field,
+        success: function (res) {
+          if (res.code !== 200) {
+            return hui_toast('error', res.msg);
+          }
+          return hui_toast('success', res.msg, function () {
+            layer.closeAll('page');
+          });
+        }
+      });
+      return false;
+    })
+
+  })
+</script>
