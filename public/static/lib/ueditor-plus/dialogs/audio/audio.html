@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type"/>
+    <script src="../internal.js?aea0c61c" type="text/javascript"></script>
+    <link href="audio.css?c75591bc" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<div class="wrapper">
+    <div id="audioTab">
+        <div class="tabhead" id="tabHeads">
+            <span class="focus" data-content-id="audio" tabSrc="audio"><var id="lang_tab_insertV"></var></span>
+            <span data-content-id="upload" style="display:none;" tabSrc="upload"><var
+                id="lang_tab_uploadV"></var></span>
+        </div>
+        <div class="tabbody" id="tabBodys">
+            <div class="panel focus" id="audio">
+                <table>
+                    <tr>
+                        <td><label class="url" for="audioUrl"><var id="lang_audio_url"></var></label></td>
+                        <td><input id="audioUrl" type="text"><a href="javascript:;" id="audioSelect"
+                                                                style="display:none;">选择音频</a></td>
+                    </tr>
+                </table>
+                <div style="padding:0 5px 5px 5px;color:#999;">
+                    外链音频支持MP3格式
+                </div>
+                <div id="preview"></div>
+                <div id="audioInfo">
+                    <fieldset>
+                        <legend><var id="lang_alignment"></var></legend>
+                        <div id="audioFloat"></div>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="panel" id="upload">
+                <div id="upload_left">
+                    <div class="queueList" id="queueList">
+                        <div class="statusBar element-invisible">
+                            <div class="progress">
+                                <span class="text">0%</span>
+                                <span class="percentage"></span>
+                            </div>
+                            <div class="info"></div>
+                            <div class="btns">
+                                <div id="filePickerBtn"></div>
+                                <div class="uploadBtn"><var id="lang_start_upload"></var></div>
+                            </div>
+                        </div>
+                        <div class="placeholder" id="dndArea">
+                            <div class="filePickerContainer">
+                                <div id="filePickerReady"></div>
+                            </div>
+                        </div>
+                        <ul class="filelist element-invisible">
+                            <li class="filePickerBlock" id="filePickerBlock"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="uploadaudioInfo">
+                    <fieldset>
+                        <legend><var id="lang_upload_alignment"></var></legend>
+                        <div id="upload_alignment"></div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jquery -->
+<script src="../../third-party/jquery-1.10.2.js?628072e7" type="text/javascript"></script>
+
+<!-- webuploader -->
+<script src="../../third-party/webuploader/webuploader.js?6da2823d" type="text/javascript"></script>
+<link href="../../third-party/webuploader/webuploader.css?0057c5c7" rel="stylesheet" type="text/css">
+
+<!-- audio -->
+<script src="audio.js?e57dd1f7" type="text/javascript"></script>
+</body>
+</html>

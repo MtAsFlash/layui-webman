@@ -9,8 +9,8 @@ return [
         'tpl_begin' => '{',
         'tpl_end' => '}',
         'tpl_replace_string' => [
-            '__STATIC_ADMIN__' => '/app/admin/admin',
-            '__LIB__' => '/app/admin/lib',
+            '__STATIC_ADMIN__' => '/static/admin',
+            '__LIB__' => '/static/lib',
         ],
     ],
 ];
